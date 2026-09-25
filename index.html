@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif Kimia XI - Ikatan Kimia & Bentuk Molekul</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandBlue: '#1e40af',
+                        brandBlueLight: '#3b82f6',
+                        brandBlueDark: '#1e3a8a',
+                        brandYellow: '#f59e0b',
+                        brandYellowLight: '#fef08a',
+                        brandRed: '#dc2626',
+                        brandRedLight: '#fee2e2'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Segoe UI', 'Roboto', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes floatMascot {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.8); }
+        }
+        @keyframes shakeError {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
+        .animate-mascot { animation: floatMascot 4s ease-in-out infinite; }
+        .pulse-glow { animation: pulseGlow 2s infinite; }
+        .shake { animation: shakeError 0.4s ease-in-out; }
+        
+        .drag-item { cursor: grab; user-select: none; }
+        .drag-item:active { cursor: grabbing; }
+        .drop-zone.drag-over { border-color: #3b82f6; background-color: #eff6ff; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-between selection:bg-amber-200">
+
+    <!-- Top Header / Banner -->
+    <header class="bg-gradient-to-r from-blue-900 via-blue-700 to-indigo-900 text-white shadow-lg border-b-4 border-amber-400">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3 text-center md:text-left">
+                <div class="bg-amber-400 text-blue-950 p-3 rounded-2xl font-black text-2xl shadow-md border-2 border-white">
+                    ⚛️
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black tracking-wide text-amber-300">
+                        KUIS INTERAKTIF KIMIA XI
+                    </h1>
+                    <p class="text-xs md:text-sm text-blue-100 font-medium">
+                        Materi: Ikatan Kimia & Bentuk Molekul (Fase F)
+                    </p>
+                </div>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20 text-xs md:text-sm text-right">
+                <p class="font-bold text-amber-300">Lia Siti Marliah, S.Pd.</p>
+                <p class="text-blue-100">SMAN 1 Parongpong</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-5xl w-full mx-auto p-4 md:p-6 flex-grow">
+
+        <!-- WELCOME SCREEN -->
+        <section id="screen-welcome" class="bg-white rounded-3xl shadow-xl border-2 border-blue-100 p-6 md:p-10 text-center relative overflow-hidden">
+            <div class="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 bg-amber-200 rounded-full blur-3xl opacity-50"></div>
+            <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-48 h-48 bg-blue-200 rounded-full blur-3xl opacity-50"></div>
+
+            <div class="relative z-10 max-w-2xl mx-auto">
+                <!-- SVG Mascot Preview -->
+                <div class="w-32 h-32 mx-auto mb-4 animate-mascot">
+                    <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                        <circle cx="50" cy="50" r="42" fill="#3b82f6" stroke="#1e3a8a" stroke-width="4"/>
+                        <circle cx="50" cy="50" r="34" fill="#60a5fa"/>
+                        <!-- Eyes -->
+                        <circle cx="38" cy="42" r="6" fill="#ffffff"/>
+                        <circle cx="38" cy="42" r="3" fill="#1e3a8a"/>
+                        <circle cx="62" cy="42" r="6" fill="#ffffff"/>
+                        <circle cx="62" cy="42" r="3" fill="#1e3a8a"/>
+                        <!-- Eyebrows -->
+                        <path d="M 32 33 Q 38 30 44 33" stroke="#1e3a8a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                        <path d="M 56 33 Q 62 30 68 33" stroke="#1e3a8a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                        <!-- Smile -->
+                        <path d="M 38 58 Q 50 68 62 58" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <!-- Cheeks -->
+                        <circle cx="30" cy="52" r="4" fill="#ef4444" opacity="0.6"/>
+                        <circle cx="70" cy="52" r="4" fill="#ef4444" opacity="0.6"/>
+                        <!-- Electron Orbits -->
+                        <ellipse cx="50" cy="50" rx="46" ry="16" fill="none" stroke="#facc15" stroke-width="2" transform="rotate(30 50 50)"/>
+                        <circle cx="85" cy="30" r="4" fill="#dc2626"/>
+                    </svg>
+                </div>
+
+                <h2 class="text-2xl md:text-3xl font-extrabold text-blue-900 mb-2">
+                    Uji Pemahaman Kimia HOTS
+                </h2>
+                <p class="text-slate-600 mb-6 text-sm md:text-base leading-relaxed">
+                    Selamat datang di media kuis interaktif berbasis <span class="font-semibold text-blue-700">Deep Learning</span>! Kamu akan menyelesaikan 10 tantangan penalaran tinggi mencakup <span class="font-bold text-amber-600">Ikatan Ion & Kovalen</span> serta <span class="font-bold text-red-600">Geometri Molekul (VSEPR)</span>.
+                </p>
+
+                <!-- Information Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-left text-xs md:text-sm">
+                    <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 flex items-start space-x-3">
+                        <span class="text-2xl">🎯</span>
+                        <div>
+                            <h3 class="font-bold text-amber-900">Tujuan Pembelajaran</h3>
+                            <p class="text-amber-800">Membedakan ikatan ion & kovalen serta menentukan bentuk molekul senyawa.</p>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-200 flex items-start space-x-3">
+                        <span class="text-2xl">🧩</span>
+                        <div>
+                            <h3 class="font-bold text-blue-900">Variasi Soal</h3>
+                            <p class="text-blue-800">Pilihan Ganda, PG Kompleks, Drag & Drop, dan Benar/Salah.</p>
+                        </div>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-2xl border border-red-200 flex items-start space-x-3">
+                        <span class="text-2xl">💡</span>
+                        <div>
+                            <h3 class="font-bold text-red-900">Umpan Balik</h3>
+                            <p class="text-red-800">Penjelasan konsep langsung setelah setiap jawaban kamu berikan.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Student Name -->
+                <div class="mb-6 max-w-sm mx-auto text-left">
+                    <label for="student-name" class="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Nama Lengkap Siswa:</label>
+                    <input type="text" id="student-name" placeholder="Masukkan nama kamu di sini..." class="w-full px-4 py-3 rounded-xl border-2 border-slate-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-200 outline-none transition text-sm font-semibold">
+                </div>
+
+                <button id="btn-start" onclick="startQuiz()" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 text-blue-950 font-black text-lg rounded-2xl shadow-lg hover:shadow-amber-400/50 hover:scale-105 active:scale-95 transition transform duration-200 border-2 border-amber-300">
+                    🚀 Mulai Kuis Sekarang
+                </button>
+            </div>
+        </section>
+
+        <!-- QUIZ CONTAINER SCREEN -->
+        <section id="screen-quiz" class="hidden space-y-6">
+            
+            <!-- Progress Header & Mascot Widget -->
+            <div class="bg-white p-4 md:p-6 rounded-3xl shadow-md border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
+                
+                <!-- Mascot & Reaction Speech Bubble -->
+                <div class="flex items-center space-x-4 w-full md:w-auto">
+                    <div id="mascot-avatar" class="w-16 h-16 flex-shrink-0 transition transform duration-300">
+                        <!-- Dynamic Mascot SVG will render here -->
+                    </div>
+                    <div class="bg-slate-100 p-3 rounded-2xl rounded-tl-none border border-slate-200 text-xs md:text-sm font-medium text-slate-700 relative max-w-xs">
+                        <p id="mascot-speech">Yuk, baca dan analisis soal berikut dengan teliti!</p>
+                    </div>
+                </div>
+
+                <!-- Progress Bar & Score Tracker -->
+                <div class="w-full md:w-1/2 space-y-2">
+                    <div class="flex justify-between text-xs md:text-sm font-bold text-slate-600">
+                        <span id="question-progress-text">Soal 1 dari 10</span>
+                        <span id="score-counter-text" class="text-blue-700">Skor Sementara: 0</span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="bg-gradient-to-r from-blue-600 via-amber-400 to-red-500 h-full w-0 transition-all duration-500"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Card Container -->
+            <div id="question-card" class="bg-white p-6 md:p-8 rounded-3xl shadow-xl border-2 border-blue-100 relative">
+                
+                <!-- Question Type Badge -->
+                <div class="flex justify-between items-center mb-4">
+                    <span id="question-type-badge" class="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-black rounded-full uppercase tracking-wider border border-amber-300">
+                        Pilihan Ganda
+                    </span>
+                    <span id="question-points-badge" class="text-xs font-bold text-slate-500">
+                        Bobot: 10 Poin
+                    </span>
+                </div>
+
+                <!-- Question Prompt -->
+                <div id="question-context" class="mb-6">
+                    <p id="question-text" class="text-base md:text-lg font-bold text-slate-800 leading-relaxed">
+                        <!-- Dynamic Question Text -->
+                    </p>
+                </div>
+
+                <!-- Interactive Answer Area -->
+                <div id="answer-interactive-area" class="mb-6 space-y-3">
+                    <!-- Dynamic choices / Drag & Drop / Checkboxes / True-False will render here -->
+                </div>
+
+                <!-- Action Button -->
+                <div class="flex justify-end pt-4 border-t border-slate-100">
+                    <button id="btn-submit-answer" onclick="submitAnswer()" class="px-6 py-3 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-2xl shadow-md hover:shadow-blue-500/30 transition active:scale-95 text-sm md:text-base">
+                        Kirim Jawaban ➔
+                    </button>
+                    <button id="btn-next-question" onclick="nextQuestion()" class="hidden px-6 py-3 bg-amber-500 hover:bg-amber-600 text-blue-950 font-black rounded-2xl shadow-md hover:shadow-amber-500/30 transition active:scale-95 text-sm md:text-base">
+                        Lanjut Soal Berikutnya ➔
+                    </button>
+                </div>
+
+                <!-- Inline Feedback Box -->
+                <div id="feedback-box" class="hidden mt-6 p-4 rounded-2xl border text-sm transition-all duration-300">
+                    <div class="flex items-start space-x-3">
+                        <span id="feedback-icon" class="text-2xl flex-shrink-0"></span>
+                        <div>
+                            <h4 id="feedback-title" class="font-bold text-base mb-1"></h4>
+                            <p id="feedback-explanation" class="text-slate-700 leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- RESULT DASHBOARD SCREEN -->
+        <section id="screen-result" class="hidden space-y-6">
+            <div class="bg-white p-6 md:p-10 rounded-3xl shadow-xl border-2 border-blue-100 text-center relative overflow-hidden">
+                <canvas id="confetti-canvas" class="absolute inset-0 pointer-events-none z-10 w-full h-full"></canvas>
+
+                <div class="relative z-20">
+                    <div class="w-24 h-24 mx-auto mb-4" id="result-mascot-container">
+                        <!-- Mascot SVG -->
+                    </div>
+
+                    <h2 class="text-2xl md:text-4xl font-black text-blue-900 mb-1">
+                        Laporan Capaian Pembelajaran
+                    </h2>
+                    <p id="result-student-display" class="text-sm md:text-base font-semibold text-slate-600 mb-6">
+                        Siswa: <span class="text-blue-700 font-bold" id="res-name-val">-</span>
+                    </p>
+
+                    <!-- Score Highlight Card -->
+                    <div class="max-w-md mx-auto bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white rounded-3xl p-6 shadow-2xl border-4 border-amber-400 mb-8 relative">
+                        <p class="text-xs font-bold uppercase tracking-widest text-amber-300">Nilai Akhir Kuis</p>
+                        <div class="text-5xl md:text-6xl font-black text-amber-400 my-2" id="res-score-val">0</div>
+                        <p class="text-sm font-medium text-blue-100" id="res-grade-predicate">Kategori: -</p>
+                    </div>
+
+                    <!-- Breakdown Statistics Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-left">
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <p class="text-xs font-bold text-slate-500 uppercase">Total Benar</p>
+                            <p class="text-xl md:text-2xl font-black text-emerald-600" id="res-correct-count">0 / 10</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <p class="text-xs font-bold text-slate-500 uppercase">Akurasi Jawaban</p>
+                            <p class="text-xl md:text-2xl font-black text-blue-600" id="res-accuracy-val">0%</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <p class="text-xs font-bold text-slate-500 uppercase">PG & PG Kompleks</p>
+                            <p class="text-xl md:text-2xl font-black text-amber-600" id="res-mc-count">0</p>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                            <p class="text-xs font-bold text-slate-500 uppercase">Drag & B/S</p>
+                            <p class="text-xl md:text-2xl font-black text-indigo-600" id="res-interactive-count">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Deep Learning Reflection Box -->
+                    <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 mb-8 text-left">
+                        <h3 class="font-bold text-amber-900 flex items-center gap-2 mb-2">
+                            <span>🧠</span> Catatan Reflektif & Rekomendasi Guru:
+                        </h3>
+                        <p id="res-reflection-text" class="text-amber-950 text-sm leading-relaxed">
+                            --
+                        </p>
+                    </div>
+
+                    <!-- Detailed Answer Review Accordion / Toggle -->
+                    <div class="text-left mb-8">
+                        <button onclick="toggleReviewDetails()" class="w-full py-3 px-4 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold text-slate-700 text-sm flex justify-between items-center transition">
+                            <span>🔍 Pembahasan Lengkap Semua Soal</span>
+                            <span id="review-toggle-icon">▼</span>
+                        </button>
+                        <div id="review-details-container" class="hidden mt-4 space-y-4 max-h-96 overflow-y-auto pr-2">
+                            <!-- Dynamic Review Content -->
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row justify-center gap-4">
+                        <button onclick="restartQuiz()" class="px-8 py-4 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-2xl shadow-lg transition active:scale-95 text-sm md:text-base">
+                            🔄 Ulangi Kuis
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-4 px-4 text-center text-xs border-t border-slate-800">
+        <p>© 2026 Media Pembelajaran Digital Kimia XI - SMAN 1 Parongpong.</p>
+        <p class="mt-1 text-slate-500">Dikembangkan oleh <span class="text-amber-400 font-semibold">Lia Siti Marliah</span> berbasis Pendekatan <span class="text-blue-400 font-semibold">Deep Learning</span>.</p>
+    </footer>
+
+    <script>
+        /* SOUND SYNTHESIZER (Web Audio API) - No External Audio File Dependency */
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                if (!audioCtx) return;
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+
+                if (type === 'correct') {
+                    // Ascending cheerful chime (C5 -> E5 -> G5)
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+                    osc.start(now);
+                    osc.stop(now + 0.4);
+                } else if (type === 'wrong') {
+                    // Descending error tone
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now); // A3
+                    osc.frequency.linearRampToValueAtTime(140, now + 0.25);
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'complete') {
+                    // Victory Fanfare Chord
+                    [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.type = 'sine';
+                        o.frequency.setValueAtTime(freq, now + (i * 0.08));
+                        g.gain.setValueAtTime(0.15, now + (i * 0.08));
+                        g.gain.exponentialRampToValueAtTime(0.001, now + 0.8 + (i * 0.08));
+                        o.start(now + (i * 0.08));
+                        o.stop(now + 0.8 + (i * 0.08));
+                    });
+                }
+            } catch (e) {
+                console.log('Audio error:', e);
+            }
+        }
+
+        function getMascotSVG(emotion = 'happy') {
+            let eyeScaleY = 1;
+            let mouthPath = "M 38 58 Q 50 68 62 58"; // Happy
+            let bgFill = "#3b82f6";
+            let eyebrowPath1 = "M 32 33 Q 38 30 44 33";
+            let eyebrowPath2 = "M 56 33 Q 62 30 68 33";
+
+            if (emotion === 'correct') {
+                mouthPath = "M 36 55 Q 50 72 64 55 Z"; // Excited open smile
+                bgFill = "#10b981"; // Emerald
+                eyebrowPath1 = "M 32 30 Q 38 25 44 30";
+                eyebrowPath2 = "M 56 30 Q 62 25 68 30";
+            } else if (emotion === 'wrong') {
+                mouthPath = "M 38 62 Q 50 52 62 62"; // Sad / Puzzled
+                bgFill = "#ef4444"; // Red
+                eyebrowPath1 = "M 32 35 Q 38 40 44 35";
+                eyebrowPath2 = "M 56 35 Q 62 40 68 35";
+            } else if (emotion === 'thinking') {
+                mouthPath = "M 38 60 L 62 60";
+                bgFill = "#f59e0b"; // Yellow/Amber
+            }
+
+            return `
+            <svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
+                <circle cx="50" cy="50" r="42" fill="${bgFill}" stroke="#1e3a8a" stroke-width="4" class="transition-colors duration-300"/>
+                <circle cx="50" cy="50" r="34" fill="#ffffff" opacity="0.2"/>
+                <!-- Eyes -->
+                <circle cx="38" cy="42" r="6" fill="#ffffff"/>
+                <circle cx="38" cy="42" r="3" fill="#1e3a8a"/>
+                <circle cx="62" cy="42" r="6" fill="#ffffff"/>
+                <circle cx="62" cy="42" r="3" fill="#1e3a8a"/>
+                <!-- Eyebrows -->
+                <path d="${eyebrowPath1}" stroke="#1e3a8a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <path d="${eyebrowPath2}" stroke="#1e3a8a" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                <!-- Mouth -->
+                <path d="${mouthPath}" stroke="#ffffff" stroke-width="3.5" fill="${emotion === 'correct' ? '#ffffff' : 'none'}" stroke-linecap="round"/>
+                <!-- Cheeks -->
+                <circle cx="30" cy="52" r="4" fill="#f43f5e" opacity="0.6"/>
+                <circle cx="70" cy="52" r="4" fill="#f43f5e" opacity="0.6"/>
+                <!-- Orbit Ring -->
+                <ellipse cx="50" cy="50" rx="46" ry="16" fill="none" stroke="#facc15" stroke-width="2.5" transform="rotate(-20 50 50)"/>
+                <circle cx="20" cy="35" r="4" fill="#facc15"/>
+            </svg>
+            `;
+        }
+
+        const questionsData = [
+            {
+                id: 1,
+                type: 'mc', // Multiple Choice
+                badge: 'Pilihan Ganda',
+                points: 10,
+                question: 'Garam dapur (NaCl) memiliki titik leleh sangat tinggi (801°C) dan dapat menghantarkan arus listrik saat dilelehan. Sebaliknya, gula pasir (C12H22O11) mudah meleleh pada suhu rendah dan lelehannya tidak menghantarkan listrik. Mengapa kedua zat padat ini menunjukkan perbedaan sifat fisika yang sangat drastis?',
+                options: [
+                    'NaCl memiliki ikatan ionik dengan gaya elektrostatik antaron kuat dalam kisi 3D, sedangkan gula merupakan molekul kovalen netral.',
+                    'Gula membentuk ikatan ionik yang rapuh, sedangkan NaCl memiliki ikatan kovalen raksasa yang tidak mudah putus.',
+                    'NaCl menyerap elektron dari udara saat dipanaskan, sedangkan gula melepaskan proton ke lingkungan.',
+                    'Gula tidak melarutkan ion karena merupakan unsur logam murni, sedangkan NaCl bersifat nonpolar.'
+                ],
+                correctAnswer: 0,
+                explanation: 'NaCl terbentuk dari ikatan IONIK antara cation Na+ dan anion Cl- yang tersusun dalam kisi kristal 3D yang kokoh. Dibutuhkan energi kalor tinggi (801°C) untuk memutuskan gaya elektrostatik ini. Dalam fase lelehan/larutan, ion-ionnya bebas bergerak menghantarkan listrik. Sedangkan gula bersifat KOVALEN molekular yang hanya diikat oleh gaya antarmolekul lemah.'
+            },
+            {
+                id: 2,
+                type: 'mc_complex', // Multiple Choice Complex (Multiple correct answers)
+                badge: 'Pilihan Ganda Kompleks',
+                points: 10,
+                question: 'Diberikan data nomor atom beberapa unsur berikut: X (Nomor atom = 1), Y (Nomor atom = 6), Z (Nomor atom = 17), W (Nomor atom = 11). Pilih SEMUA pernyataan yang BENAR mengenai kombinasi pembentukan ikatan antar unsur tersebut!',
+                options: [
+                    'Senyawa antara W dan Z membentuk ikatan ionik dengan rumus WZ.',
+                    'Senyawa antara Y dan X membentuk ikatan kovalen nonpolar berupa YX4.',
+                    'Senyawa antara W dan X membentuk molekul kovalen polar berwujud gas.',
+                    'Kombinasi Z dan X membentuk molekul kovalen polar ZX (HCl).'
+                ],
+                correctAnswers: [0, 1, 3], // 0, 1, and 3 are correct
+                explanation: 'Konfigurasi: X=1 (H, nonlogam), Y=6 (C, nonlogam valensi 4), Z=17 (Cl, nonlogam valensi 7), W=11 (Na, logam valensi 1).<br>1. W (Na) + Z (Cl) -> NaCl (Ikatan IONIK, WZ) [BENAR].<br>2. Y (C) + 4X (H) -> CH4 (Kovalen Simetris Nonpolar, YX4) [BENAR].<br>3. W (Na) + X (H) -> NaH (Senyawa hidrida logam/ionik, BUKAN kovalen polar gas) [SALAH].<br>4. Z (Cl) + X (H) -> HCl (Kovalen Polar, ZX) [BENAR].'
+            },
+            {
+                id: 3,
+                type: 'tf', // True or False
+                badge: 'Benar / Salah',
+                points: 10,
+                question: 'Molekul Belerang Heksafluorida (SF6) melanggar Kaidah Oktet karena atom pusat Belerang (S) dikelilingi oleh 12 elektron valensi (oktet berkembang/terekspansi).',
+                options: ['BENAR', 'SALAH'],
+                correctAnswer: 0, // 0 = BENAR
+                explanation: 'PERNYATAAN BENAR! Atom Belerang (S) memiliki 6 elektron valensi dan mengikat 6 atom Fluorin (F) membentuk 6 pasang elektron ikatan (PEI = 6). Sehingga total ada 12 elektron di sekitar atom pusat S. Ini merupakan contoh "Oktet Terekspansi" yang stabil pada unsur periode 3 ke atas karena memiliki subkulit d kosong.'
+            },
+            {
+                id: 4,
+                type: 'matching', // Drag and Drop / Matching
+                badge: 'Menjodohkan (Matching)',
+                points: 10,
+                question: 'Jodohkanlah Molekul/Pasangan PEI & PEB berikut dengan Geometri Molekul (Bentuk Molekul VSEPR) yang Tepat!',
+                pairs: [
+                    { item: 'CH4 (4 PEI, 0 PEB)', target: 'Tetrahedral' },
+                    { item: 'NH3 (3 PEI, 1 PEB)', target: 'Trigonal Piramida' },
+                    { item: 'H2O (2 PEI, 2 PEB)', target: 'Bentuk V / Bengkok' },
+                    { item: 'BF3 (3 PEI, 0 PEB)', target: 'Trigonal Planar' }
+                ],
+                explanation: 'Sesuai Teori VSEPR/Domain Elektron:<br>• AX4 (CH4): Tetrahedral (sudut 109,5°)<br>• AX3E (NH3): Trigonal Piramida (terdistorsi oleh 1 PEB, sudut 107°)<br>• AX2E2 (H2O): Bentuk V / Bengkok (2 PEB menolak kuat, sudut 104,5°)<br>• AX3 (BF3): Trigonal Planar / Segitiga Datar (sudut 120°).'
+            },
+            {
+                id: 5,
+                type: 'mc',
+                badge: 'Pilihan Ganda',
+                points: 10,
+                question: 'Molekul CO2 dan H2O sama-sama terdiri dari 3 atom dan memiliki ikatan kovalen polar antar atomnya. Namun, eksperimen menunjukkan bahwa CO2 bersifat NONPOLAR (momen dipol = 0), sedangkan H2O bersifat POLAR. Manakah penjelasan ilmiah yang paling tepat?',
+                options: [
+                    'CO2 berbentuk linier simetris sehingga momen dipol ikatannya saling meniadakan, sedangkan H2O berbentuk V asimetris karena dorongan PEB.',
+                    'Atom Oksigen pada CO2 tidak memiliki elektronegativitas, sedangkan pada H2O bersifat sangat asam.',
+                    'CO2 mengikat ikatan ionik ganda, sedangkan H2O merupakan senyawa kovalen tunggal raksasa.',
+                    'H2O memiliki massa molekul lebih kecil sehingga elektron menyebar tidak merata.'
+                ],
+                correctAnswer: 0,
+                explanation: 'CO2 memiliki geometri Linier (AX2) dengan sudut ikatan 180°. Momen dipol dari dua ikatan C=O berlawanan arah tepat 180° sehingga saling menghilangkan (vektor μ = 0, NONPOLAR). Sebaliknya, H2O memiliki 2 PEB di atom pusat O (AX2E2) yang menyebabkan geometri berbentuk V (bengkok) asimetris, sehingga momen dipol tidak saling meniadakan (POLAR).'
+            },
+            {
+                id: 6,
+                type: 'mc_complex',
+                badge: 'Pilihan Ganda Kompleks',
+                points: 10,
+                question: 'Seorang siswa menganalisis dua sampel zat misterius A dan B di laboratorium SMAN 1 Parongpong. Hasil ujinya:<br>• Zat A: Larut baik dalam air, lelehannya dapat menyalakan lampu indikator listrik.<br>• Zat B: Mudah menguap, titik leleh -94°C, larutannya tidak menghantar listrik.<br>Pilih SEMUA kesimpulan yang BENAR!',
+                options: [
+                    'Zat A tersusun atas struktur kristal kisi ionik.',
+                    'Zat B merupakan senyawa kovalen nonpolar berwujud molekul sederhana.',
+                    'Zat A pasti terbentuk dari dua unsur sesama nonlogam.',
+                    'Antar molekul Zat B hanya diikat oleh gaya Van der Waals / antarmolekul yang relatif lemah.'
+                ],
+                correctAnswers: [0, 1, 3],
+                explanation: '• Zat A menunjukkan sifat khas SENYAWA IONIK: daya hantar lelehan/larutan tinggi, kisi kristal kokoh.<br>• Zat B menunjukkan sifat khas SENYAWA KOVALEN sederhana: titik leleh rendah (-94°C), tidak menghantar listrik, diikat oleh gaya antarmolekul (Van der Waals) yang lemah.<br>• Pernyataan bahwa Zat A dari sesama nonlogam adalah SALAH karena ikatan ionik umumnya melibatkan Logam (Kation) + Nonlogam (Anion).'
+            },
+            {
+                id: 7,
+                type: 'ordering', // Ordering
+                badge: 'Mengurutkan (Ordering)',
+                points: 10,
+                question: 'Urutkan molekul-molekul berikut berdasarkan BESAR SUDUT IKATAN (H-X-H) dari yang TERBESAR hingga TERKECIL!',
+                items: [
+                    { id: 'a', text: 'CH4 (Tetrahedral: 0 PEB)' },
+                    { id: 'b', text: 'NH3 (Trigonal Piramida: 1 PEB)' },
+                    { id: 'c', text: 'H2O (Bentuk V: 2 PEB)' }
+                ],
+                correctOrder: ['a', 'b', 'c'], // CH4 (109.5) > NH3 (107) > H2O (104.5)
+                explanation: 'Semakin banyak Pasangan Elektron Bebas (PEB) pada atom pusat, semakin besar daya tolakannya terhadap Pasangan Elektron Ikatan (PEI). Akibatnya, sudut ikatan makin mengecil:<br>1. CH4 (0 PEB) = 109,5° (Terbesar)<br>2. NH3 (1 PEB) = 107,3°<br>3. H2O (2 PEB) = 104,5° (Terkecil).'
+            },
+            {
+                id: 8,
+                type: 'tf',
+                badge: 'Benar / Salah',
+                points: 10,
+                question: 'Molekul Xenon Tetrafluorida (XeF4) memiliki geometri molekul Segiempat Planar (Square Planar) meskipun atom pusat Xe memiliki total 6 pasangan elektron (4 PEI dan 2 PEB).',
+                options: ['BENAR', 'SALAH'],
+                correctAnswer: 0, // BENAR
+                explanation: 'PERNYATAAN BENAR! Tipe molekul XeF4 adalah AX4E2 (4 PEI + 2 PEB = 6 Domain). Geometri domain elektronnya adalah Oktahedral. Untuk meminimalkan tolakan antar PEB, kedua PEB berada pada posisi aksial saling berhadapan (180°), sehingga geometri molekul yang terlihat adalah Segiempat Planar (Square Planar).'
+            },
+            {
+                id: 9,
+                type: 'mc',
+                badge: 'Pilihan Ganda',
+                points: 10,
+                question: 'Unsur P (Nomor atom 15) berikatan dengan 5 atom Cl (Nomor atom 17) membentuk molekul PCl5. Bagaimanakah hibridisasi atom pusat P dan bentuk molekul dari PCl5?',
+                options: [
+                    'Hibridisasi sp3d dan Bentuk Trigonal Bipiramida',
+                    'Hibridisasi sp3d2 dan Bentuk Oktahedral',
+                    'Hibridisasi sp3 dan Bentuk Tetrahedral',
+                    'Hibridisasi sp2 dan Bentuk Trigonal Planar'
+                ],
+                correctAnswer: 0,
+                explanation: 'Konfigurasi P: [Ne] 3s² 3p³. Pada keadaan tereksitasi untuk mengikat 5 atom Cl, 1 elektron dari 3s dipromosikan ke orbital 3d. Penggabungan 1 orbital s, 3 orbital p, dan 1 orbital d menghasilkan 5 orbital hibrida sp3d. Tipe molekul AX5 membentuk geometri Trigonal Bipiramida.'
+            },
+            {
+                id: 10,
+                type: 'mc_complex',
+                badge: 'Pilihan Ganda Kompleks',
+                points: 10,
+                question: 'Bandingkan senyawa Hidrogen Fluorida (HF) dan Hidrogen Klorida (HCl). Pilih SEMUA pernyataan yang BENAR mengenai sifat ikatan dan interaksi antarmolekulnya!',
+                options: [
+                    'Kepolaran ikatan HF lebih tinggi daripada HCl karena elektronegativitas Fluorin lebih besar dibanding Klorin.',
+                    'Antar molekul HF terdapat Ikatan Hidrogen yang sangat kuat, menyebabkan titik didih HF lebih tinggi dari HCl.',
+                    'HCl memiliki bentuk molekul Trigonal Datar sedangkan HF berbentuk Linier.',
+                    'Kedua molekul merupakan kovalen polar dengan momen dipol lebih besar dari nol.'
+                ],
+                correctAnswers: [0, 1, 3],
+                explanation: '1. Elektronegativitas F (4,0) > Cl (3,0), sehingga dipol ikatan H-F lebih polar dibanding H-Cl [BENAR].<br>2. Adanya ikatan hidrogen intermolekul F-H...F menyebabkan titik didih HF (+19,5°C) jauh lebih tinggi dibanding HCl (-85°C) [BENAR].<br>3. Kedua molekul diatomik berunsur beda (HF & HCl) sama-sama berbentuk LINIER [SALAH].<br>4. Keduanya kovalen polar bermomen dipol μ > 0 [BENAR].'
+            }
+        ];
+
+        let studentName = "";
+        let currentQuestionIndex = 0;
+        let userAnswers = {}; // Stores user answers per question index
+        let totalScore = 0;
+        let selectedMatchingPairs = {}; // Temporary storage for matching
+        let selectedOrderList = []; // Temporary storage for ordering
+
+        function startQuiz() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            if (!nameInput) {
+                alert('Silakan masukkan nama lengkap kamu terlebih dahulu sebelum memulai kuis!');
+                return;
+            }
+            studentName = nameInput;
+            initAudio();
+
+            document.getElementById('screen-welcome').classList.add('hidden');
+            document.getElementById('screen-quiz').classList.remove('hidden');
+
+            currentQuestionIndex = 0;
+            totalScore = 0;
+            userAnswers = {};
+
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = questionsData[currentQuestionIndex];
+            
+            // Update Header & Progress
+            document.getElementById('question-progress-text').innerText = `Soal ${currentQuestionIndex + 1} dari ${questionsData.length}`;
+            document.getElementById('score-counter-text').innerText = `Skor Sementara: ${totalScore}`;
+            const progressPercent = ((currentQuestionIndex) / questionsData.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            // Mascot Avatar Reset
+            document.getElementById('mascot-avatar').innerHTML = getMascotSVG('happy');
+            document.getElementById('mascot-speech').innerText = "Analisis pertanyaan ini dengan cermat ya!";
+
+            // Badges & Prompt
+            document.getElementById('question-type-badge').innerText = q.badge;
+            document.getElementById('question-points-badge').innerText = `Bobot: ${q.points} Poin`;
+            document.getElementById('question-text').innerHTML = q.question;
+
+            // Reset Feedback Box & Buttons
+            const feedbackBox = document.getElementById('feedback-box');
+            feedbackBox.classList.add('hidden');
+            feedbackBox.className = "hidden mt-6 p-4 rounded-2xl border text-sm transition-all duration-300";
+            
+            document.getElementById('btn-submit-answer').classList.remove('hidden');
+            document.getElementById('btn-next-question').classList.add('hidden');
+
+            const container = document.getElementById('answer-interactive-area');
+            container.innerHTML = '';
+
+            // Render specific UI depending on Question Type
+            if (q.type === 'mc' || q.type === 'tf') {
+                q.options.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = `option-btn w-full text-left p-4 rounded-2xl border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition flex items-center space-x-3 text-slate-700 font-semibold text-sm md:text-base`;
+                    btn.onclick = () => selectSingleOption(idx);
+                    btn.setAttribute('data-idx', idx);
+                    btn.innerHTML = `
+                        <span class="w-8 h-8 rounded-full bg-slate-100 border border-slate-300 flex items-center justify-center font-bold text-xs text-slate-600 flex-shrink-0 option-indicator">
+                            ${String.fromCharCode(65 + idx)}
+                        </span>
+                        <span class="leading-relaxed">${opt}</span>
+                    `;
+                    container.appendChild(btn);
+                });
+            } else if (q.type === 'mc_complex') {
+                const hint = document.createElement('p');
+                hint.className = "text-xs font-bold text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200 mb-2";
+                hint.innerText = "⚠️ Petunjuk: Pilih lebih dari satu jawaban yang kamu anggap benar.";
+                container.appendChild(hint);
+
+                q.options.forEach((opt, idx) => {
+                    const label = document.createElement('label');
+                    label.className = `complex-option-label block w-full text-left p-4 rounded-2xl border-2 border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer text-slate-700 font-semibold text-sm md:text-base flex items-start space-x-3`;
+                    label.innerHTML = `
+                        <input type="checkbox" value="${idx}" class="complex-checkbox mt-1 w-5 h-5 text-blue-600 rounded border-slate-300 focus:ring-blue-500">
+                        <span class="leading-relaxed">${opt}</span>
+                    `;
+                    container.appendChild(label);
+                });
+            } else if (q.type === 'matching') {
+                selectedMatchingPairs = {};
+                const instruction = document.createElement('p');
+                instruction.className = "text-xs font-bold text-blue-700 bg-blue-50 p-2 rounded-lg border border-blue-200 mb-3";
+                instruction.innerText = "🧩 Petunjuk: Pilih opsi Pasangan di sebelah kiri, lalu pilih Geometri Molekul yang pas di sebelah kanan.";
+                container.appendChild(instruction);
+
+                const grid = document.createElement('div');
+                grid.className = "grid grid-cols-1 md:grid-cols-2 gap-4";
+
+                const leftCol = document.createElement('div');
+                leftCol.className = "space-y-2";
+                leftCol.innerHTML = "<h4 class='font-bold text-xs text-slate-500 uppercase mb-2'>1. Molekul / Pasangan PEI-PEB</h4>";
+
+                const rightCol = document.createElement('div');
+                rightCol.className = "space-y-2";
+                rightCol.innerHTML = "<h4 class='font-bold text-xs text-slate-500 uppercase mb-2'>2. Geometri Molekul</h4>";
+
+                // Shuffle targets for matching
+                const shuffledTargets = [...q.pairs].map(p => p.target).sort(() => Math.random() - 0.5);
+
+                q.pairs.forEach((pair, idx) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = "p-3 bg-slate-100 rounded-xl border border-slate-300 font-semibold text-xs md:text-sm text-slate-800 flex justify-between items-center";
+                    itemDiv.innerText = pair.item;
+                    leftCol.appendChild(itemDiv);
+                });
+
+                q.pairs.forEach((pair, idx) => {
+                    const select = document.createElement('select');
+                    select.className = "matching-select w-full p-3 bg-white border-2 border-slate-300 rounded-xl text-xs md:text-sm font-semibold focus:border-blue-600 outline-none";
+                    select.setAttribute('data-pair-index', idx);
+                    
+                    let defaultOpt = `<option value="">-- Pilih Geometri Molekul --</option>`;
+                    shuffledTargets.forEach(t => {
+                        defaultOpt += `<option value="${t}">${t}</option>`;
+                    });
+                    select.innerHTML = defaultOpt;
+                    rightCol.appendChild(select);
+                });
+
+                grid.appendChild(leftCol);
+                grid.appendChild(rightCol);
+                container.appendChild(grid);
+            } else if (q.type === 'ordering') {
+                selectedOrderList = [...q.items];
+                const instruction = document.createElement('p');
+                instruction.className = "text-xs font-bold text-indigo-700 bg-indigo-50 p-2 rounded-lg border border-indigo-200 mb-3";
+                instruction.innerText = "↕️ Petunjuk: Gunakan tombol Naik (▲) dan Turun (▼) untuk menyusun urutan dari Sudut Ikatan TERBESAR (Paling Atas) ke TERKECIL (Paling Bawah).";
+                container.appendChild(instruction);
+
+                const listContainer = document.createElement('div');
+                listContainer.id = "ordering-list-container";
+                listContainer.className = "space-y-2";
+                container.appendChild(listContainer);
+
+                renderOrderingItems();
+            }
+        }
+
+        /* Helper for Single Choice Option Selection */
+        let currentSelectedSingleIdx = null;
+        function selectSingleOption(idx) {
+            currentSelectedSingleIdx = idx;
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('border-blue-600', 'bg-blue-100', 'ring-2', 'ring-blue-300');
+                btn.querySelector('.option-indicator').classList.remove('bg-blue-600', 'text-white');
+            });
+            const selectedBtn = document.querySelector(`.option-btn[data-idx="${idx}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('border-blue-600', 'bg-blue-100', 'ring-2', 'ring-blue-300');
+                selectedBtn.querySelector('.option-indicator').classList.add('bg-blue-600', 'text-white');
+            }
+        }
+
+        /* Helper for Ordering Items UI */
+        function renderOrderingItems() {
+            const container = document.getElementById('ordering-list-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            selectedOrderList.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = "p-3 bg-white border-2 border-slate-200 rounded-2xl flex items-center justify-between shadow-sm";
+                div.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="w-6 h-6 rounded-full bg-indigo-600 text-white font-bold text-xs flex items-center justify-center">${idx + 1}</span>
+                        <span class="font-semibold text-xs md:text-sm text-slate-800">${item.text}</span>
+                    </div>
+                    <div class="flex space-x-1">
+                        <button onclick="moveOrder(${idx}, -1)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold ${idx === 0 ? 'opacity-30 cursor-not-allowed' : ''}">▲</button>
+                        <button onclick="moveOrder(${idx}, 1)" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold ${idx === selectedOrderList.length - 1 ? 'opacity-30 cursor-not-allowed' : ''}">▼</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function moveOrder(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= selectedOrderList.length) return;
+            const temp = selectedOrderList[index];
+            selectedOrderList[index] = selectedOrderList[newIndex];
+            selectedOrderList[newIndex] = temp;
+            renderOrderingItems();
+        }
+
+        function submitAnswer() {
+            const q = questionsData[currentQuestionIndex];
+            let isCorrect = false;
+            let userAnsValue = null;
+
+            if (q.type === 'mc' || q.type === 'tf') {
+                if (currentSelectedSingleIdx === null) {
+                    alert('Pilihlah salah satu jawaban terlebih dahulu!');
+                    return;
+                }
+                userAnsValue = currentSelectedSingleIdx;
+                isCorrect = (userAnsValue === q.correctAnswer);
+            } else if (q.type === 'mc_complex') {
+                const checkedBoxes = Array.from(document.querySelectorAll('.complex-checkbox:checked')).map(cb => parseInt(cb.value));
+                if (checkedBoxes.length === 0) {
+                    alert('Pilih setidaknya satu pilihan jawaban!');
+                    return;
+                }
+                userAnsValue = checkedBoxes;
+                // Check if arrays match
+                const correctSet = new Set(q.correctAnswers);
+                isCorrect = (checkedBoxes.length === q.correctAnswers.length) && checkedBoxes.every(val => correctSet.has(val));
+            } else if (q.type === 'matching') {
+                const selects = document.querySelectorAll('.matching-select');
+                let allFilled = true;
+                let userMatches = [];
+                selects.forEach(s => {
+                    if (!s.value) allFilled = false;
+                    userMatches.push(s.value);
+                });
+                if (!allFilled) {
+                    alert('Lengkapi seluruh pasangan geometri molekul terlebih dahulu!');
+                    return;
+                }
+                userAnsValue = userMatches;
+                // Check if matches equal q.pairs targets
+                isCorrect = q.pairs.every((pair, idx) => pair.target === userMatches[idx]);
+            } else if (q.type === 'ordering') {
+                const userOrderIds = selectedOrderList.map(item => item.id);
+                userAnsValue = userOrderIds;
+                isCorrect = userOrderIds.every((id, idx) => id === q.correctOrder[idx]);
+            }
+
+            // Save User Record
+            userAnswers[currentQuestionIndex] = {
+                isCorrect: isCorrect,
+                userAns: userAnsValue
+            };
+
+            if (isCorrect) {
+                totalScore += q.points;
+                playSound('correct');
+                document.getElementById('mascot-avatar').innerHTML = getMascotSVG('correct');
+                document.getElementById('mascot-speech').innerText = "Hebat sekali! Analisis kamu tepat sempurna!";
+            } else {
+                playSound('wrong');
+                document.getElementById('mascot-avatar').innerHTML = getMascotSVG('wrong');
+                document.getElementById('mascot-speech').innerText = "Ups! Masih kurang tepat. Yuk pelajari konsepnya di bawah!";
+            }
+
+            // Display Inline Feedback Box
+            const feedbackBox = document.getElementById('feedback-box');
+            const feedbackIcon = document.getElementById('feedback-icon');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackExp = document.getElementById('feedback-explanation');
+
+            feedbackBox.classList.remove('hidden');
+            if (isCorrect) {
+                feedbackBox.className = "mt-6 p-4 rounded-2xl border text-sm transition-all duration-300 bg-emerald-50 border-emerald-300 text-emerald-900";
+                feedbackIcon.innerText = "✅";
+                feedbackTitle.innerText = "Jawaban Benar! (+10 Poin)";
+            } else {
+                feedbackBox.className = "mt-6 p-4 rounded-2xl border text-sm transition-all duration-300 bg-red-50 border-red-300 text-red-900 shake";
+                feedbackIcon.innerText = "❌";
+                feedbackTitle.innerText = "Jawaban Kurang Tepat (0 Poin)";
+            }
+            feedbackExp.innerHTML = q.explanation;
+
+            // Toggle Action Buttons
+            document.getElementById('btn-submit-answer').classList.add('hidden');
+            document.getElementById('btn-next-question').classList.remove('hidden');
+
+            // Reset selection state tracker
+            currentSelectedSingleIdx = null;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questionsData.length) {
+                renderQuestion();
+            } else {
+                showQuizResult();
+            }
+        }
+
+        function showQuizResult() {
+            document.getElementById('screen-quiz').classList.add('hidden');
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            // Final Audio
+            playSound('complete');
+
+            // Calculations
+            let correctCount = 0;
+            let mcCount = 0;
+            let interactiveCount = 0;
+
+            questionsData.forEach((q, idx) => {
+                const record = userAnswers[idx];
+                if (record && record.isCorrect) {
+                    correctCount++;
+                    if (q.type === 'mc' || q.type === 'mc_complex') mcCount++;
+                    else interactiveCount++;
+                }
+            });
+
+            const maxScore = questionsData.length * 10;
+            const percentage = Math.round((totalScore / maxScore) * 100);
+
+            // UI Text Display
+            document.getElementById('res-name-val').innerText = studentName;
+            document.getElementById('res-score-val').innerText = totalScore;
+            document.getElementById('res-correct-count').innerText = `${correctCount} / ${questionsData.length}`;
+            document.getElementById('res-accuracy-val').innerText = `${percentage}%`;
+            document.getElementById('res-mc-count').innerText = `${mcCount} Benar`;
+            document.getElementById('res-interactive-count').innerText = `${interactiveCount} Benar`;
+
+            // Mascot & Predicate logic
+            const mascotBox = document.getElementById('result-mascot-container');
+            const predicateText = document.getElementById('res-grade-predicate');
+            const reflectionText = document.getElementById('res-reflection-text');
+
+            if (percentage >= 80) {
+                mascotBox.innerHTML = getMascotSVG('correct');
+                predicateText.innerText = "Kategori: SANGAT MAHIR (Advanced)";
+                reflectionText.innerHTML = `Selamat <b>${studentName}</b>! Kamu menunjukkan pemahaman mendalam tentang konsep Ikatan Ion, Kovalen, serta Teori VSEPR/Geometri Molekul. Kamu sudah mampu menganalisis struktur dan sifat fisik senyawa secara kritis! Pertahankan prestasimu!`;
+                launchConfetti();
+            } else if (percentage >= 60) {
+                mascotBox.innerHTML = getMascotSVG('happy');
+                predicateText.innerText = "Kategori: MAHIR (Proficient)";
+                reflectionText.innerHTML = `Kerja bagus <b>${studentName}</b>! Pemahaman dasar kamu mengenai ikatan kimia sudah cukup kokoh. Cobalah untuk lebih cermat lagi saat menganalisis kepolaran molekul asimetris serta jumlah PEB/PEI pada bentuk molekul kompleks.`;
+            } else {
+                mascotBox.innerHTML = getMascotSVG('thinking');
+                predicateText.innerText = "Kategori: PERLU PENINGKATAN (Developing)";
+                reflectionText.innerHTML = `Tetap semangat <b>${studentName}</b>! Pembelajaran Kimia adalah sebuah proses bertahap. Luangkan waktu untuk mengulas kembali perbedaan gaya elektrostatik ikatan ion vs kovalen serta susunan domain elektron VSEPR. Ayo coba lagi kuis ini untuk mengasah pemahamanmu!`;
+            }
+
+            // Build Review Section
+            buildReviewDetails();
+        }
+
+        function buildReviewDetails() {
+            const container = document.getElementById('review-details-container');
+            container.innerHTML = '';
+
+            questionsData.forEach((q, idx) => {
+                const record = userAnswers[idx];
+                const isCorrect = record ? record.isCorrect : false;
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl border ${isCorrect ? 'bg-emerald-50/50 border-emerald-200' : 'bg-red-50/50 border-red-200'} text-xs md:text-sm space-y-2`;
+                
+                card.innerHTML = `
+                    <div class="flex items-center justify-between font-bold">
+                        <span class="${isCorrect ? 'text-emerald-800' : 'text-red-800'}">Soal ${idx + 1} (${q.badge})</span>
+                        <span class="${isCorrect ? 'text-emerald-600' : 'text-red-600'}">${isCorrect ? '✓ Benar (+10)' : '✗ Salah (0)'}</span>
+                    </div>
+                    <p class="font-semibold text-slate-800">${q.question}</p>
+                    <div class="p-3 bg-white/80 rounded-xl border border-slate-200 text-slate-700">
+                        <p class="font-bold text-blue-900 mb-1">💡 Penjelasan Konsep:</p>
+                        <p class="leading-relaxed">${q.explanation}</p>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleReviewDetails() {
+            const el = document.getElementById('review-details-container');
+            const icon = document.getElementById('review-toggle-icon');
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                icon.innerText = "▲";
+            } else {
+                el.classList.add('hidden');
+                icon.innerText = "▼";
+            }
+        }
+
+        function restartQuiz() {
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-welcome').classList.remove('hidden');
+        }
+
+        function launchConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+
+            const particles = [];
+            const colors = ['#f59e0b', '#3b82f6', '#ef4444', '#10b981', '#8b5cf6'];
+
+            for (let i = 0; i < 80; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    vy: Math.random() * 3 + 2,
+                    vx: Math.random() * 2 - 1,
+                    rotation: Math.random() * 360
+                });
+            }
+
+            let animationFrameId;
+            let counter = 0;
+
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.y += p.vy;
+                    p.x += p.vx;
+                    p.rotation += 2;
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+                });
+
+                counter++;
+                if (counter < 200) {
+                    animationFrameId = requestAnimationFrame(render);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+
+            render();
+        }
+    </script>
+</body>
+</html>
