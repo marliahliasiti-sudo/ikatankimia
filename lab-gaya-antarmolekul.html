@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab Maya · Gaya Antarmolekul, Ikatan Hidrogen &amp; Ikatan Logam</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#0b1220;
+  --bg-deep:#070c17;
+  --panel:#131b2e;
+  --panel-2:#1a2338;
+  --border:#263252;
+  --text:#eaf2ff;
+  --text-dim:#8fa0c6;
+  --vdw:#3fd0f5;      /* gaya london / van der waals */
+  --dip:#8b8bff;      /* dipol-dipol */
+  --hbond:#ff6b6b;    /* ikatan hidrogen */
+  --metal:#ffc94a;    /* ikatan logam */
+  --good:#4ade80;
+  --bad:#ff6b6b;
+  --radius:14px;
+  --radius-sm:8px;
+}
+*{box-sizing:border-box;}
+html,body{
+  height:100%; margin:0; padding:0; overflow:hidden;
+  background:var(--bg); color:var(--text);
+  font-family:'Inter',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.disp{font-family:'Space Grotesk',system-ui,sans-serif;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:8px;}
+::-webkit-scrollbar-track{background:transparent;}
+button{font-family:inherit;cursor:pointer;}
+input,textarea,select{font-family:inherit;}
+a{color:var(--vdw);}
+
+/* ---------- background atmosphere ---------- */
+#bg-field{position:fixed;inset:0;z-index:0;background:
+  radial-gradient(circle at 15% 20%,rgba(63,208,245,.10),transparent 40%),
+  radial-gradient(circle at 85% 15%,rgba(255,107,107,.08),transparent 45%),
+  radial-gradient(circle at 50% 90%,rgba(255,201,74,.07),transparent 45%),
+  var(--bg-deep);
+}
+
+/* ---------- SPLASH ---------- */
+#splash{
+  position:fixed;inset:0;z-index:100;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:var(--bg-deep);
+  transition:opacity .7s ease, visibility .7s;
+}
+#splash.hide{opacity:0;visibility:hidden;pointer-events:none;}
+.splash-orbit{position:relative;width:180px;height:180px;margin-bottom:28px;}
+.splash-core{position:absolute;top:50%;left:50%;width:26px;height:26px;margin:-13px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#fff,var(--metal) 60%,#a86f00);box-shadow:0 0 30px var(--metal);}
+.splash-ring{position:absolute;inset:0;border-radius:50%;border:1.5px dashed rgba(255,255,255,.18);animation:spin 6s linear infinite;}
+.splash-ring.r2{inset:22px;border-color:rgba(63,208,245,.35);animation-duration:4s;animation-direction:reverse;}
+.splash-e{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--vdw);box-shadow:0 0 10px var(--vdw);top:-6px;left:50%;margin-left:-6px;}
+.splash-e.e2{background:var(--hbond);box-shadow:0 0 10px var(--hbond);}
+@keyframes spin{to{transform:rotate(360deg);}}
+#splash h1{font-size:1.6rem;margin:0 0 6px;letter-spacing:.3px;}
+#splash p{color:var(--text-dim);margin:0 0 24px;font-size:.95rem;}
+.splash-bar{width:280px;height:6px;border-radius:6px;background:var(--panel-2);overflow:hidden;}
+.splash-bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--vdw),var(--hbond),var(--metal));animation:load 2.1s ease forwards;}
+@keyframes load{to{width:100%;}}
+
+/* ---------- LOGIN ---------- */
+#login-screen{
+  position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(circle at 50% 30%,rgba(63,208,245,.08),transparent 55%),var(--bg-deep);
+  opacity:0;visibility:hidden;transition:opacity .5s;
+}
+#login-screen.show{opacity:1;visibility:visible;}
+.login-card{
+  width:420px;max-width:90vw;background:var(--panel);border:1px solid var(--border);
+  border-radius:var(--radius);padding:34px 32px;box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.login-card .tag{font-size:.72rem;letter-spacing:1px;color:var(--vdw);margin-bottom:6px;text-transform:uppercase;}
+.login-card h2{margin:0 0 4px;font-size:1.5rem;}
+.login-card p.sub{color:var(--text-dim);margin:0 0 22px;font-size:.88rem;line-height:1.5;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:.8rem;color:var(--text-dim);margin-bottom:6px;}
+.field input{
+  width:100%;padding:11px 13px;border-radius:var(--radius-sm);border:1px solid var(--border);
+  background:var(--bg);color:var(--text);font-size:.95rem;outline:none;transition:border-color .2s;
+}
+.field input:focus{border-color:var(--vdw);}
+.btn{
+  border:none;border-radius:var(--radius-sm);padding:11px 18px;font-weight:600;font-size:.9rem;
+  transition:transform .15s, box-shadow .15s, opacity .15s; color:#0b1220;
+  background:var(--vdw);
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(63,208,245,.35);}
+.btn:active{transform:translateY(0);}
+.btn.wide{width:100%;padding:13px;margin-top:6px;font-size:.95rem;}
+.btn.ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn.hbond{background:var(--hbond);color:#3b0b0b;}
+.btn.metal{background:var(--metal);color:#3b2a00;}
+.btn.small{padding:7px 12px;font-size:.78rem;}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none;}
+.err-msg{color:var(--bad);font-size:.8rem;margin-top:-8px;margin-bottom:12px;min-height:1em;}
+
+/* ---------- APP SHELL ---------- */
+#app{
+  position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;
+  opacity:0;transition:opacity .5s;
+}
+#app.show{opacity:1;}
+#topbar{
+  display:flex;align-items:center;gap:18px;padding:10px 22px;
+  background:linear-gradient(180deg,rgba(19,27,46,.95),rgba(19,27,46,.85));
+  border-bottom:1px solid var(--border);backdrop-filter:blur(6px);flex:0 0 auto;
+}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand .mark{width:34px;height:34px;border-radius:9px;background:conic-gradient(from 90deg,var(--vdw),var(--hbond),var(--metal),var(--vdw));display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+.brand .mark span{width:14px;height:14px;background:var(--bg-deep);border-radius:4px;}
+.brand h1{font-size:1.02rem;margin:0;line-height:1.15;}
+.brand small{display:block;color:var(--text-dim);font-size:.68rem;font-weight:500;}
+
+#tabnav{display:flex;gap:4px;margin:0 auto;background:var(--bg);border:1px solid var(--border);padding:4px;border-radius:11px;}
+#tabnav button{
+  background:transparent;border:none;color:var(--text-dim);font-size:.83rem;font-weight:600;
+  padding:8px 14px;border-radius:8px;transition:.2s;
+}
+#tabnav button:hover{color:var(--text);}
+#tabnav button.active{background:var(--panel-2);color:var(--text);box-shadow:inset 0 0 0 1px var(--border);}
+
+#top-right{display:flex;align-items:center;gap:10px;flex:0 0 auto;}
+.student-pill{display:flex;align-items:center;gap:8px;background:var(--panel-2);border:1px solid var(--border);padding:6px 12px;border-radius:20px;font-size:.78rem;}
+.student-pill b{color:var(--vdw);font-weight:700;}
+.icon-btn{
+  width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--panel-2);
+  color:var(--text);display:flex;align-items:center;justify-content:center;font-size:1rem;transition:.2s;
+}
+.icon-btn:hover{border-color:var(--vdw);color:var(--vdw);}
+.icon-btn.muted{opacity:.55;}
+
+#content{flex:1 1 auto;min-height:0;position:relative;}
+.tab-panel{position:absolute;inset:0;display:none;padding:18px 26px 16px;overflow:auto;}
+.tab-panel.active{display:block;}
+
+.section-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;}
+.section-head h2{margin:0;font-size:1.25rem;}
+.section-head p{margin:2px 0 0;color:var(--text-dim);font-size:.83rem;}
+
+/* ---------- cards / grid ---------- */
+.grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px;}
+.card h3{margin:0 0 8px;font-size:1rem;display:flex;align-items:center;gap:8px;}
+.card p{color:#c6d2ef;font-size:.87rem;line-height:1.65;margin:0 0 8px;}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.2px;}
+.chip.vdw{background:rgba(63,208,245,.14);color:var(--vdw);}
+.chip.dip{background:rgba(139,139,255,.16);color:var(--dip);}
+.chip.hb{background:rgba(255,107,107,.14);color:var(--hbond);}
+.chip.metal{background:rgba(255,201,74,.16);color:var(--metal);}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+
+/* ---------- THEORY tab specifics ---------- */
+#teoriSub{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+#teoriSub button{background:var(--panel);border:1px solid var(--border);color:var(--text-dim);padding:7px 13px;border-radius:9px;font-size:.8rem;font-weight:600;}
+#teoriSub button.active{color:var(--bg);background:var(--vdw);border-color:var(--vdw);}
+.teori-block{display:none;}
+.teori-block.active{display:block;}
+.molecule3d-wrap{perspective:900px;width:100%;height:220px;display:flex;align-items:center;justify-content:center;}
+.molecule3d{position:relative;width:150px;height:150px;transform-style:preserve-3d;animation:rot3d 12s linear infinite;}
+@keyframes rot3d{from{transform:rotateY(0deg) rotateX(12deg);}to{transform:rotateY(360deg) rotateX(12deg);}}
+.atom{position:absolute;border-radius:50%;box-shadow:inset -6px -8px 14px rgba(0,0,0,.4), 0 0 18px rgba(0,0,0,.4);}
+.atom.O{width:56px;height:56px;background:radial-gradient(circle at 32% 28%,#ff9e9e,var(--hbond) 65%,#8a1f1f);top:47px;left:47px;box-shadow:0 0 22px rgba(255,107,107,.55);}
+.atom.H{width:26px;height:26px;background:radial-gradient(circle at 32% 28%,#fff,#cfe9ff 60%,#7fb2e0);}
+.atom.H1{top:8px;left:6px;transform:translateZ(38px);}
+.atom.H2{top:8px;left:96px;transform:translateZ(38px);}
+.bond3d{position:absolute;height:4px;background:linear-gradient(90deg,#cfe9ff,var(--hbond));border-radius:4px;transform-origin:left center;top:70px;left:73px;}
+.bond3d.b1{width:58px;transform:rotate(-135deg) translateZ(20px);}
+.bond3d.b2{width:58px;transform:rotate(215deg) translateZ(20px);}
+.diagram-svg{width:100%;height:auto;display:block;}
+.illustration-note{font-size:.68rem;color:var(--text-dim);text-align:center;margin-top:6px;}
+
+/* ---------- PROSEDUR ---------- */
+.step-list{counter-reset:step;list-style:none;margin:0;padding:0;}
+.step-list li{position:relative;padding:14px 16px 14px 52px;background:var(--panel);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;}
+.step-list li::before{counter-increment:step;content:counter(step);position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  width:26px;height:26px;border-radius:50%;background:var(--metal);color:#3b2a00;font-weight:700;font-size:.85rem;display:flex;align-items:center;justify-content:center;}
+.step-list li b{display:block;margin-bottom:2px;font-size:.92rem;}
+.step-list li span{color:var(--text-dim);font-size:.83rem;line-height:1.5;}
+
+/* ---------- SIMULASI ---------- */
+.sim-wrap{display:grid;grid-template-columns:260px 1fr 260px;gap:14px;height:calc(100% - 6px);}
+.sim-col{display:flex;flex-direction:column;gap:12px;min-height:0;}
+.sim-col.mid{min-width:0;}
+.sim-panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:14px;}
+.sim-panel h4{margin:0 0 10px;font-size:.82rem;text-transform:uppercase;letter-spacing:.5px;color:var(--text-dim);}
+.substance-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 11px;margin-bottom:7px;
+  background:var(--bg);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:.82rem;font-weight:600;}
+.substance-btn.active{border-color:var(--vdw);box-shadow:0 0 0 1px var(--vdw);}
+.substance-btn small{display:block;color:var(--text-dim);font-weight:500;font-size:.7rem;}
+#simStage{flex:1;min-height:0;background:radial-gradient(circle at 50% 20%,rgba(255,255,255,.03),transparent 60%),#070c17;border:1px solid var(--border);border-radius:var(--radius);position:relative;overflow:hidden;}
+#simCanvas{width:100%;height:100%;display:block;}
+.sim-hud{position:absolute;top:10px;left:12px;font-size:.72rem;color:var(--text-dim);background:rgba(7,12,23,.55);padding:6px 10px;border-radius:8px;line-height:1.6;}
+.sim-hud b{color:var(--text);}
+.sim-legend{position:absolute;bottom:10px;left:12px;display:flex;gap:12px;font-size:.68rem;color:var(--text-dim);background:rgba(7,12,23,.55);padding:5px 10px;border-radius:8px;}
+.sim-legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px;}
+.range-row{margin-bottom:12px;}
+.range-row label{display:flex;justify-content:space-between;font-size:.78rem;color:var(--text-dim);margin-bottom:5px;}
+.range-row input[type=range]{width:100%;accent-color:var(--vdw);}
+.sim-btnrow{display:flex;gap:8px;}
+.sim-btnrow .btn{flex:1;}
+#phaseTag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700;}
+.rec-toggle{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text-dim);margin-top:8px;}
+
+/* ---------- LKPD ---------- */
+#lkpdSheet{background:#fff;color:#12162a;border-radius:var(--radius);padding:26px 30px;max-width:900px;margin:0 auto 30px;}
+#lkpdSheet h2{color:#12162a;font-size:1.15rem;margin:0 0 4px;}
+#lkpdSheet .lkpd-meta{display:flex;gap:26px;font-size:.8rem;color:#4a5578;margin-bottom:14px;border-bottom:1px solid #e4e8f5;padding-bottom:12px;}
+#lkpdSheet h3{font-size:.92rem;margin:18px 0 8px;color:#12162a;border-left:4px solid var(--vdw);padding-left:8px;}
+#lkpdSheet p.lkpd-p{font-size:.83rem;color:#33395c;line-height:1.6;}
+.lkpd-table{width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:6px;}
+.lkpd-table th,.lkpd-table td{border:1px solid #d7ddef;padding:7px 8px;text-align:left;}
+.lkpd-table th{background:#f1f4fc;}
+.lkpd-table input, .lkpd-table select{width:100%;border:none;background:transparent;font-size:.78rem;font-family:inherit;}
+#lkpdSheet textarea{width:100%;min-height:64px;border:1px solid #d7ddef;border-radius:8px;padding:8px;font-family:inherit;font-size:.82rem;resize:vertical;}
+.lkpd-actionbar{display:flex;gap:10px;justify-content:center;margin-bottom:18px;}
+.save-flag{font-size:.72rem;color:var(--good);text-align:center;margin-bottom:6px;min-height:1em;}
+
+/* ---------- EVALUASI ---------- */
+#evalIntro{max-width:640px;margin:30px auto;text-align:center;}
+#evalIntro h2{font-size:1.4rem;margin-bottom:8px;}
+#evalIntro p{color:var(--text-dim);font-size:.9rem;line-height:1.6;}
+.eval-progress{height:6px;background:var(--panel-2);border-radius:6px;overflow:hidden;margin:14px 0 22px;max-width:760px;margin-left:auto;margin-right:auto;}
+.eval-progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--vdw),var(--hbond));transition:width .3s;}
+.q-card{max-width:760px;margin:0 auto 14px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;}
+.q-card .qn{font-size:.72rem;color:var(--vdw);font-weight:700;letter-spacing:.5px;margin-bottom:6px;}
+.q-card .qtext{font-size:.96rem;margin-bottom:14px;line-height:1.55;}
+.opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--border);border-radius:9px;margin-bottom:8px;font-size:.85rem;transition:.15s;}
+.opt:hover{border-color:var(--vdw);}
+.opt input{accent-color:var(--vdw);width:16px;height:16px;}
+.blank-input{border:none;border-bottom:2px solid var(--vdw);background:transparent;color:var(--hbond);font-weight:700;
+  font-size:.9rem;width:130px;text-align:center;padding:2px 4px;margin:0 3px;}
+.eval-nav{max-width:760px;margin:10px auto 30px;display:flex;justify-content:space-between;}
+#evalResult{max-width:640px;margin:30px auto;text-align:center;}
+.score-ring{width:150px;height:150px;border-radius:50%;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;
+  background:conic-gradient(var(--vdw) calc(var(--pct,0)*1%), var(--panel-2) 0);}
+.score-ring div{width:120px;height:120px;border-radius:50%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-ring b{font-size:1.7rem;}
+.score-ring span{font-size:.68rem;color:var(--text-dim);}
+
+/* ---------- PROFIL ---------- */
+.profile-wrap{max-width:760px;margin:20px auto;display:flex;gap:26px;align-items:flex-start;}
+.profile-photo{width:170px;height:170px;border-radius:18px;background:var(--panel-2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;flex:0 0 auto;color:var(--text-dim);font-size:.75rem;text-align:center;}
+.profile-photo img{width:100%;height:100%;object-fit:cover;display:none;}
+.profile-info h2{margin:0 0 4px;}
+.profile-info .role{color:var(--vdw);font-size:.85rem;font-weight:600;margin-bottom:12px;}
+.profile-info p{color:#c6d2ef;font-size:.87rem;line-height:1.65;}
+.profile-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+
+/* ---------- AI Assistant ---------- */
+#aiBtn{position:fixed;right:22px;bottom:22px;z-index:60;width:56px;height:56px;border-radius:50%;
+  background:conic-gradient(from 90deg,var(--vdw),var(--hbond),var(--metal),var(--vdw));border:none;
+  box-shadow:0 10px 30px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:1.4rem;}
+#aiBtn:hover{filter:brightness(1.1);}
+#aiPanel{position:fixed;right:22px;bottom:90px;z-index:61;width:340px;height:440px;background:var(--panel);
+  border:1px solid var(--border);border-radius:var(--radius);display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 20px 60px rgba(0,0,0,.55);transform:translateY(12px) scale(.97);opacity:0;visibility:hidden;transition:.2s;}
+#aiPanel.show{transform:none;opacity:1;visibility:visible;}
+#aiPanel .ai-head{padding:12px 14px;background:var(--panel-2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;font-size:.85rem;font-weight:700;}
+#aiPanel .ai-head span{width:8px;height:8px;background:var(--good);border-radius:50%;}
+#aiMsgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px;}
+.ai-msg{max-width:85%;padding:8px 11px;border-radius:11px;font-size:.8rem;line-height:1.5;}
+.ai-msg.bot{background:var(--panel-2);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:3px;}
+.ai-msg.me{background:var(--vdw);color:#082;color:#06202b;align-self:flex-end;border-bottom-right-radius:3px;font-weight:600;}
+#aiForm{display:flex;border-top:1px solid var(--border);}
+#aiForm input{flex:1;border:none;background:transparent;padding:11px;color:var(--text);font-size:.82rem;outline:none;}
+#aiForm button{border:none;background:var(--vdw);color:#06202b;padding:0 16px;font-weight:700;}
+
+/* ---------- toast ---------- */
+#toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);z-index:80;
+  background:var(--panel-2);border:1px solid var(--border);padding:10px 18px;border-radius:10px;font-size:.82rem;
+  opacity:0;visibility:hidden;transition:.25s;}
+#toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);}
+
+@media (max-width:1100px){
+  .sim-wrap{grid-template-columns:1fr;height:auto;}
+  .grid2{grid-template-columns:1fr;}
+  .profile-wrap{flex-direction:column;align-items:center;text-align:center;}
+}
+</style>
+</head>
+<body>
+
+<div id="bg-field"></div>
+
+<!-- ============ SPLASH ============ -->
+<div id="splash">
+  <div class="splash-orbit">
+    <div class="splash-core"></div>
+    <div class="splash-ring"><div class="splash-e"></div></div>
+    <div class="splash-ring r2"><div class="splash-e e2"></div></div>
+  </div>
+  <h1 class="disp">Laboratorium Maya Kimia</h1>
+  <p>Gaya Antarmolekul · Ikatan Hidrogen · Ikatan Logam</p>
+  <div class="splash-bar"><i></i></div>
+</div>
+
+<!-- ============ LOGIN ============ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="tag">Mulai Praktikum</div>
+    <h2 class="disp">Masuk sebagai Siswa</h2>
+    <p class="sub">Isi identitasmu untuk memulai praktikum maya tentang gaya antarmolekul, ikatan hidrogen, dan ikatan logam.</p>
+    <div class="field">
+      <label for="inpName">Nama Lengkap</label>
+      <input id="inpName" type="text" placeholder="Contoh: Aditya Pratama" autocomplete="off">
+    </div>
+    <div class="field">
+      <label for="inpClass">Kelas</label>
+      <input id="inpClass" type="text" placeholder="Contoh: XI MIPA 3" autocomplete="off">
+    </div>
+    <div class="err-msg" id="loginErr"></div>
+    <button class="btn wide" id="btnLogin">Mulai Praktikum →</button>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app">
+  <div id="topbar">
+    <div class="brand">
+      <div class="mark"><span></span></div>
+      <div>
+        <h1>Lab Maya: Gaya Antarmolekul</h1>
+        <small>Ikatan Hidrogen &amp; Ikatan Logam · Kimia SMA/MA Kelas XI</small>
+      </div>
+    </div>
+
+    <div id="tabnav">
+      <button data-tab="teori" class="active">Teori</button>
+      <button data-tab="prosedur">Prosedur</button>
+      <button data-tab="simulasi">Simulasi</button>
+      <button data-tab="lkpd">LKPD</button>
+      <button data-tab="evaluasi">Evaluasi</button>
+      <button data-tab="profil">Profil Pengembang</button>
+    </div>
+
+    <div id="top-right">
+      <div class="student-pill">👤 <b id="pillName">-</b> · <span id="pillClass">-</span></div>
+      <button class="icon-btn" id="soundToggle" title="Aktif/Nonaktifkan Suara">🔊</button>
+      <button class="icon-btn" id="fsToggle" title="Layar Penuh">⛶</button>
+      <button class="icon-btn" id="resetTabBtn" title="Reset Tab Ini">↺</button>
+    </div>
+  </div>
+
+  <div id="content">
+
+    <!-- ================= TEORI ================= -->
+    <section class="tab-panel active" id="tab-teori">
+      <div class="section-head">
+        <div>
+          <h2 class="disp">Teori: Gaya Antarmolekul</h2>
+          <p>Rangkuman materi setara Kimia SMA/MA Kelas XI — Gaya Antarmolekul, Ikatan Hidrogen, dan Ikatan Logam.</p>
+        </div>
+      </div>
+
+      <div id="teoriSub">
+        <button data-sub="vdw" class="active">Gaya Van der Waals</button>
+        <button data-sub="hbond">Ikatan Hidrogen</button>
+        <button data-sub="metal">Ikatan Logam</button>
+        <button data-sub="banding">Perbandingan</button>
+      </div>
+
+      <!-- VDW -->
+      <div class="teori-block active" id="teori-vdw">
+        <div class="grid2">
+          <div class="card">
+            <h3><span class="chip vdw">Gaya London (Dispersi)</span></h3>
+            <p>Gaya London terjadi pada semua molekul, termasuk molekul nonpolar seperti gas mulia (He, Ne, Ar) dan molekul diatomik (I₂, Cl₂). Pergerakan elektron yang terus-menerus menyebabkan terbentuknya <b>dipol sesaat</b> — sisi molekul yang sesaat kaya elektron akan menginduksi dipol pada molekul tetangganya. Semakin besar dan semakin banyak elektron suatu molekul (massa molekul relatif makin besar), semakin mudah awan elektronnya terpolarisasi, sehingga gaya London makin kuat.</p>
+            <p>Inilah sebabnya titik didih golongan halogen naik dari F₂ ke I₂, meski keduanya sama-sama molekul nonpolar.</p>
+          </div>
+          <div class="card">
+            <h3><span class="chip dip">Gaya Dipol–Dipol</span></h3>
+            <p>Terjadi antara molekul-molekul polar, yaitu molekul yang memiliki momen dipol permanen akibat perbedaan keelektronegatifan antaratom penyusunnya (misalnya HCl). Ujung molekul yang agak positif akan tarik-menarik dengan ujung molekul lain yang agak negatif.</p>
+            <p>Gaya dipol-dipol umumnya lebih kuat daripada gaya London pada molekul dengan massa molekul relatif yang sebanding, sehingga senyawa polar cenderung memiliki titik didih lebih tinggi daripada senyawa nonpolar yang massanya mirip.</p>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px;">
+          <h3>Diagram Dipol Sesaat</h3>
+          <svg class="diagram-svg" viewBox="0 0 640 140">
+            <defs>
+              <radialGradient id="gA" cx="35%" cy="30%"><stop offset="0%" stop-color="#bfe9ff"/><stop offset="70%" stop-color="#3fd0f5"/><stop offset="100%" stop-color="#0d5c73"/></radialGradient>
+            </defs>
+            <g>
+              <circle cx="120" cy="70" r="42" fill="url(#gA)"/>
+              <text x="120" y="76" text-anchor="middle" font-size="13" fill="#06202b" font-weight="700">δ−</text>
+              <text x="70" y="76" text-anchor="middle" font-size="13" fill="#8fa0c6" font-weight="700">δ+</text>
+            </g>
+            <g>
+              <circle cx="330" cy="70" r="42" fill="url(#gA)"/>
+              <text x="330" y="76" text-anchor="middle" font-size="13" fill="#06202b" font-weight="700">δ+</text>
+              <text x="380" y="76" text-anchor="middle" font-size="13" fill="#8fa0c6" font-weight="700">δ−</text>
+            </g>
+            <g>
+              <circle cx="530" cy="70" r="42" fill="url(#gA)"/>
+              <text x="530" y="76" text-anchor="middle" font-size="13" fill="#06202b" font-weight="700">δ−</text>
+            </g>
+            <line x1="175" y1="70" x2="275" y2="70" stroke="#3fd0f5" stroke-width="2" stroke-dasharray="4 4"/>
+            <line x1="385" y1="70" x2="475" y2="70" stroke="#3fd0f5" stroke-width="2" stroke-dasharray="4 4"/>
+            <text x="225" y="55" text-anchor="middle" font-size="11" fill="#8fa0c6">tarik-menarik</text>
+            <text x="430" y="55" text-anchor="middle" font-size="11" fill="#8fa0c6">tarik-menarik</text>
+          </svg>
+          <p class="illustration-note">Ilustrasi: fluktuasi awan elektron menciptakan dipol sesaat yang saling menginduksi antarmolekul tetangga.</p>
+        </div>
+      </div>
+
+      <!-- HBOND -->
+      <div class="teori-block" id="teori-hbond">
+        <div class="grid2">
+          <div class="card">
+            <h3><span class="chip hb">Ikatan Hidrogen</span></h3>
+            <p>Ikatan hidrogen adalah gaya tarik antarmolekul yang jauh lebih kuat daripada gaya dipol-dipol biasa. Ikatan ini terbentuk ketika atom <b>H</b> yang terikat langsung pada atom yang sangat elektronegatif dan berukuran kecil — yaitu <b>F, O, atau N</b> — mengalami tarik-menarik dengan pasangan elektron bebas pada atom F, O, atau N dari molekul lain.</p>
+            <p>Contoh klasik: air (H₂O), amonia (NH₃), dan asam fluorida (HF). Ikatan hidrogen pada air menjelaskan mengapa titik didih air (100 °C) jauh lebih tinggi dibanding H₂S (−60 °C) walau strukturnya mirip dan S lebih berat dari O.</p>
+          </div>
+          <div class="card">
+            <h3>Mengapa Air Istimewa?</h3>
+            <p>Setiap molekul air dapat membentuk hingga 4 ikatan hidrogen dengan molekul air di sekitarnya (2 melalui atom H, 2 melalui pasangan elektron bebas O). Jaringan ikatan hidrogen inilah yang menyebabkan air memiliki titik didih tinggi, tegangan permukaan besar, serta kerapatan es lebih rendah daripada air cair.</p>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px;">
+          <h3>Model 3D Molekul Air (H₂O)</h3>
+          <div class="molecule3d-wrap">
+            <div class="molecule3d">
+              <div class="bond3d b1"></div>
+              <div class="bond3d b2"></div>
+              <div class="atom O"></div>
+              <div class="atom H H1"></div>
+              <div class="atom H H2"></div>
+            </div>
+          </div>
+          <p class="illustration-note">Model tiga dimensi (CSS 3D) — putar otomatis. Atom O (merah) mengikat dua atom H (putih) membentuk sudut ±104,5°.</p>
+        </div>
+      </div>
+
+      <!-- METAL -->
+      <div class="teori-block" id="teori-metal">
+        <div class="grid2">
+          <div class="card">
+            <h3><span class="chip metal">Ikatan Logam</span></h3>
+            <p>Ikatan logam terjadi antar atom-atom logam yang tersusun rapat dalam kisi kristal. Elektron valensi atom logam tidak terikat pada satu inti atom tertentu, melainkan bergerak bebas ke seluruh kisi — model ini dikenal sebagai <b>"lautan elektron" (sea of electrons)</b> yang mengelilingi ion-ion logam bermuatan positif.</p>
+            <p>Tarik-menarik antara ion logam positif dan lautan elektron inilah yang mengikat atom-atom logam menjadi satu kesatuan yang kuat.</p>
+          </div>
+          <div class="card">
+            <h3>Sifat-sifat Logam</h3>
+            <p>Model lautan elektron menjelaskan sifat khas logam:</p>
+            <p>• <b>Konduktor listrik &amp; panas</b> — elektron bebas mudah bergerak menghantarkan muatan/energi.<br>
+            • <b>Dapat ditempa &amp; direntangkan (malleable/ductile)</b> — lapisan ion dapat bergeser tanpa memutus ikatan karena elektron tetap menyelimuti.<br>
+            • <b>Mengkilap</b> — elektron bebas memantulkan cahaya.<br>
+            • <b>Titik leleh relatif tinggi</b> — semakin banyak elektron valensi, semakin kuat ikatan logam.</p>
+          </div>
+        </div>
+        <div class="card" style="margin-top:14px;">
+          <h3>Diagram Lautan Elektron</h3>
+          <svg class="diagram-svg" viewBox="0 0 640 170">
+            <rect x="0" y="0" width="640" height="170" fill="#0d1424" rx="10"/>
+            <g id="latticeSvg"></g>
+          </svg>
+          <p class="illustration-note">Ilustrasi: ion logam positif (bulatan emas) tersusun dalam kisi, dikelilingi elektron valensi yang bergerak bebas (titik biru).</p>
+        </div>
+      </div>
+
+      <!-- BANDING -->
+      <div class="teori-block" id="teori-banding">
+        <div class="card">
+          <h3>Perbandingan Kekuatan Gaya / Ikatan Antarmolekul</h3>
+          <p>Urutan kekuatan relatif (dari yang paling lemah ke paling kuat, untuk molekul dengan ukuran sebanding):</p>
+          <p>Gaya London &lt; Gaya Dipol-Dipol &lt; Ikatan Hidrogen ≲ Ikatan Logam / Ikatan Ion</p>
+        </div>
+        <table class="lkpd-table" style="color:var(--text);margin-top:12px;">
+          <thead>
+            <tr><th>Jenis Gaya/Ikatan</th><th>Contoh Zat</th><th>Titik Didih/Leleh</th><th>Penyebab Utama</th></tr>
+          </thead>
+          <tbody id="bandingBody" style="color:#c6d2ef;"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ================= PROSEDUR ================= -->
+    <section class="tab-panel" id="tab-prosedur">
+      <div class="section-head">
+        <div>
+          <h2 class="disp">Prosedur Praktikum Maya</h2>
+          <p>Ikuti langkah berikut sebelum dan selama menggunakan tab Simulasi.</p>
+        </div>
+      </div>
+      <div class="grid2">
+        <div>
+          <ol class="step-list">
+            <li><b>Pelajari tab Teori</b><span>Baca ringkasan gaya London, dipol-dipol, ikatan hidrogen, dan ikatan logam agar memahami dasar simulasi.</span></li>
+            <li><b>Buka tab Simulasi</b><span>Pilih salah satu zat pada panel kiri: Metana (CH₄), Asam Klorida (HCl), Air (H₂O), atau Natrium (Na) padat.</span></li>
+            <li><b>Atur suhu</b><span>Geser slider suhu pada panel kanan dan amati perubahan gerak partikel — semakin tinggi suhu, semakin cepat getaran partikel.</span></li>
+            <li><b>Amati fase &amp; garis gaya</b><span>Perhatikan label fase (padat/cair/gas) dan garis putus-putus yang menggambarkan kekuatan gaya antarmolekul (semakin tebal = semakin kuat).</span></li>
+            <li><b>Klik salah satu partikel</b><span>Klik partikel di panggung simulasi untuk melihat info singkat tentang zat tersebut.</span></li>
+            <li><b>Catat hasil pengamatan di LKPD</b><span>Pindah ke tab LKPD, isi tabel pengamatan untuk tiap zat berdasarkan simulasi yang telah kamu jalankan.</span></li>
+            <li><b>Kerjakan Evaluasi</b><span>Setelah LKPD selesai, uji pemahamanmu pada tab Evaluasi (15 soal campuran).</span></li>
+            <li><b>Unduh LKPD</b><span>Setelah LKPD terisi lengkap, klik "Unduh PDF" untuk menyimpan hasil kerjamu sebagai bukti praktikum.</span></li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>Tips Penggunaan</h3>
+          <p>• Tombol ↺ (reset) di pojok kanan atas akan mengulang tab yang sedang aktif ke kondisi awal.</p>
+          <p>• Tombol 🔊 menyalakan/mematikan efek suara interaksi.</p>
+          <p>• Jawaban LKPD tersimpan otomatis selama sesi ini berlangsung — namun unduh PDF-nya agar tidak hilang.</p>
+          <p>• Gunakan Asisten AI (ikon bulat di kanan bawah) jika ada istilah yang belum kamu pahami.</p>
+          <h3 style="margin-top:16px;">Alat &amp; Bahan (Virtual)</h3>
+          <p>Simulator partikel interaktif berbasis kanvas, 4 model zat representatif (CH₄, HCl, H₂O, Na), kontrol suhu digital, dan lembar kerja peserta didik digital.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SIMULASI ================= -->
+    <section class="tab-panel" id="tab-simulasi">
+      <div class="sim-wrap">
+        <div class="sim-col">
+          <div class="sim-panel">
+            <h4>Pilih Zat</h4>
+            <button class="substance-btn active" data-sub="ch4">Metana (CH₄) <small>Nonpolar — Gaya London</small></button>
+            <button class="substance-btn" data-sub="hcl">Asam Klorida (HCl) <small>Polar — Dipol-Dipol</small></button>
+            <button class="substance-btn" data-sub="h2o">Air (H₂O) <small>Ikatan Hidrogen</small></button>
+            <button class="substance-btn" data-sub="na">Natrium Padat (Na) <small>Ikatan Logam</small></button>
+          </div>
+          <div class="sim-panel">
+            <h4>Info Zat Terpilih</h4>
+            <p id="substanceInfo" style="font-size:.8rem;color:#c6d2ef;line-height:1.55;"></p>
+          </div>
+        </div>
+
+        <div class="sim-col mid">
+          <div id="simStage">
+            <canvas id="simCanvas"></canvas>
+            <div class="sim-hud">Fase: <span id="phaseTag">CAIR</span><br>Suhu: <b id="hudTemp">25 °C</b><br>Kecepatan partikel: <b id="hudSpeed">sedang</b></div>
+            <div class="sim-legend" id="simLegend"></div>
+          </div>
+        </div>
+
+        <div class="sim-col">
+          <div class="sim-panel">
+            <h4>Kontrol</h4>
+            <div class="range-row">
+              <label>Suhu <span id="tempVal">25 °C</span></label>
+              <input type="range" id="tempSlider" min="-180" max="200" value="25">
+            </div>
+            <div class="sim-btnrow">
+              <button class="btn small" id="playPauseBtn">⏸ Jeda</button>
+              <button class="btn small ghost" id="resetSimBtn">↺ Reset</button>
+            </div>
+          </div>
+          <div class="sim-panel">
+            <h4>Catatan Otomatis</h4>
+            <p style="font-size:.78rem;color:var(--text-dim);line-height:1.6;">Kekuatan gaya antarmolekul memengaruhi suhu perubahan fase. Zat dengan ikatan hidrogen/logam butuh suhu jauh lebih tinggi untuk mendidih/melebur dibanding zat yang hanya mengandalkan gaya London.</p>
+            <div class="rec-toggle">✅ <span id="simObsNote">Amati lalu catat di tab LKPD.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= LKPD ================= -->
+    <section class="tab-panel" id="tab-lkpd">
+      <div class="section-head">
+        <div>
+          <h2 class="disp">Lembar Kerja Peserta Didik (LKPD)</h2>
+          <p>Isi berdasarkan pengamatanmu pada tab Simulasi. Jawaban terekam otomatis.</p>
+        </div>
+      </div>
+
+      <div class="lkpd-actionbar">
+        <button class="btn ghost small" id="btnSaveLkpd">💾 Simpan Jawaban</button>
+        <button class="btn hbond small" id="btnPdfLkpd">⬇ Unduh PDF</button>
+        <button class="btn ghost small" id="btnResetLkpd">↺ Reset LKPD</button>
+      </div>
+      <div class="save-flag" id="lkpdSaveFlag"></div>
+
+      <div id="lkpdSheet">
+        <h2>LKPD — Gaya Antarmolekul, Ikatan Hidrogen &amp; Ikatan Logam</h2>
+        <div class="lkpd-meta">
+          <span>Nama: <b id="lkpdName">-</b></span>
+          <span>Kelas: <b id="lkpdClass">-</b></span>
+          <span>Tanggal: <b id="lkpdDate">-</b></span>
+        </div>
+
+        <h3>A. Tujuan</h3>
+        <p class="lkpd-p">Melalui simulasi maya, siswa dapat membandingkan pengaruh jenis gaya/ikatan antarmolekul (gaya London, dipol-dipol, ikatan hidrogen, ikatan logam) terhadap sifat fisik zat, khususnya titik didih/titik leleh.</p>
+
+        <h3>B. Tabel Pengamatan</h3>
+        <table class="lkpd-table">
+          <thead><tr><th>Zat</th><th>Jenis Gaya/Ikatan Dominan</th><th>Fase pada 25 °C (hasil simulasi)</th><th>Perkiraan Titik Didih/Leleh</th></tr></thead>
+          <tbody>
+            <tr><td>Metana (CH₄)</td><td><input data-k="g1" placeholder="isi di sini"></td><td><input data-k="f1" placeholder="isi di sini"></td><td><input data-k="t1" placeholder="isi di sini"></td></tr>
+            <tr><td>Asam Klorida (HCl)</td><td><input data-k="g2" placeholder="isi di sini"></td><td><input data-k="f2" placeholder="isi di sini"></td><td><input data-k="t2" placeholder="isi di sini"></td></tr>
+            <tr><td>Air (H₂O)</td><td><input data-k="g3" placeholder="isi di sini"></td><td><input data-k="f3" placeholder="isi di sini"></td><td><input data-k="t3" placeholder="isi di sini"></td></tr>
+            <tr><td>Natrium (Na)</td><td><input data-k="g4" placeholder="isi di sini"></td><td><input data-k="f4" placeholder="isi di sini"></td><td><input data-k="t4" placeholder="isi di sini"></td></tr>
+          </tbody>
+        </table>
+
+        <h3>C. Pertanyaan Diskusi</h3>
+        <p class="lkpd-p">1. Mengapa titik didih air jauh lebih tinggi daripada metana, padahal massa molekul relatif air lebih kecil?</p>
+        <textarea data-k="d1"></textarea>
+        <p class="lkpd-p" style="margin-top:10px;">2. Jelaskan mengapa logam dapat ditempa menjadi lempengan tipis tanpa patah, berdasarkan model lautan elektron!</p>
+        <textarea data-k="d2"></textarea>
+        <p class="lkpd-p" style="margin-top:10px;">3. Urutkan keempat zat pada tabel pengamatan dari titik didih/leleh terendah ke tertinggi, beserta alasannya.</p>
+        <textarea data-k="d3"></textarea>
+
+        <h3>D. Kesimpulan</h3>
+        <textarea data-k="kesimpulan" style="min-height:90px;"></textarea>
+      </div>
+    </section>
+
+    <!-- ================= EVALUASI ================= -->
+    <section class="tab-panel" id="tab-evaluasi">
+      <div id="evalIntro">
+        <h2 class="disp">Evaluasi Pemahaman</h2>
+        <p>15 soal — pilihan ganda, pilihan ganda kompleks (centang lebih dari satu), dan melengkapi paragraf rumpang. Skor akan muncul di akhir.</p>
+        <button class="btn wide hbond" id="btnStartEval" style="max-width:260px;margin:18px auto 0;">Mulai Evaluasi →</button>
+      </div>
+
+      <div id="evalRunning" style="display:none;">
+        <div class="eval-progress"><i id="evalProgressBar"></i></div>
+        <div id="evalQArea"></div>
+        <div class="eval-nav">
+          <button class="btn ghost small" id="evalPrev">← Sebelumnya</button>
+          <span id="evalPos" style="color:var(--text-dim);font-size:.8rem;align-self:center;"></span>
+          <button class="btn small metal" id="evalNext">Berikutnya →</button>
+        </div>
+      </div>
+
+      <div id="evalResult" style="display:none;">
+        <div class="score-ring" id="scoreRing"><div><b id="scoreNum">0</b><span>/ 15 benar</span></div></div>
+        <h3 id="scoreLabel"></h3>
+        <p id="scoreDetail" style="color:var(--text-dim);font-size:.87rem;"></p>
+        <button class="btn ghost" id="btnRetryEval" style="margin-top:10px;">Ulangi Evaluasi</button>
+      </div>
+    </section>
+
+    <!-- ================= PROFIL ================= -->
+    <section class="tab-panel" id="tab-profil">
+      <div class="profile-wrap">
+        <div class="profile-photo" id="devPhotoWrap">
+          <img id="devPhoto" src="./asset/img/developer.jpg" alt="Foto Pengembang">
+          <span id="devPhotoFallback">Foto Pengembang<br>(./asset/img/developer.jpg)</span>
+        </div>
+        <div class="profile-info">
+          <h2 class="disp">Nama Pengembang</h2>
+          <div class="role">Guru / Pengembang Media Pembelajaran Kimia</div>
+          <p>Lab maya ini dikembangkan sebagai media pembelajaran interaktif untuk materi Gaya Antarmolekul, Ikatan Hidrogen, dan Ikatan Logam pada Kimia SMA/MA Kelas XI, dengan tujuan membantu siswa memvisualisasikan konsep abstrak melalui simulasi partikel, lembar kerja digital, dan evaluasi otomatis.</p>
+          <p><i>Ganti foto profil dengan meletakkan berkas gambar pada folder <code>./asset/img/developer.jpg</code> di lokasi yang sama dengan berkas HTML ini.</i></p>
+          <div class="profile-badges">
+            <span class="chip vdw">Kimia SMA/MA Kelas XI</span>
+            <span class="chip hb">Media Interaktif</span>
+            <span class="chip metal">Lab Maya</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ============ AI ASSISTANT ============ -->
+<button id="aiBtn" title="Asisten Belajar">🤖</button>
+<div id="aiPanel">
+  <div class="ai-head"><span></span> Asisten Belajar Kimia</div>
+  <div id="aiMsgs"></div>
+  <form id="aiForm">
+    <input id="aiInput" type="text" placeholder="Tanya soal gaya antarmolekul...">
+    <button type="submit">Kirim</button>
+  </form>
+</div>
+
+<div id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= STATE ================= */
+const state = {
+  student:{name:'',cls:''},
+  soundOn:true,
+  currentTab:'teori',
+  eval:{idx:0,answers:{},submitted:false},
+  lkpd:{}
+};
+
+/* ================= SOUND ================= */
+let actx=null;
+function ac(){ if(!actx){ try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){} } return actx; }
+function beep(freq=440,dur=.12,type='sine',vol=.06,delay=0){
+  if(!state.soundOn) return;
+  const c=ac(); if(!c) return;
+  const t0=c.currentTime+delay;
+  const o=c.createOscillator(), g=c.createGain();
+  o.type=type; o.frequency.setValueAtTime(freq,t0);
+  g.gain.setValueAtTime(0,t0);
+  g.gain.linearRampToValueAtTime(vol,t0+.015);
+  g.gain.exponentialRampToValueAtTime(.0001,t0+dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0+dur+.02);
+}
+function sndClick(){ beep(520,.08,'triangle',.05); }
+function sndTab(){ beep(660,.09,'sine',.05); beep(880,.09,'sine',.04,.06); }
+function sndOk(){ beep(660,.1,'sine',.06); beep(880,.12,'sine',.06,.09); beep(1100,.14,'sine',.06,.18); }
+function sndBad(){ beep(220,.18,'sawtooth',.05); }
+function sndPop(){ beep(1200,.06,'square',.03); }
+
+document.addEventListener('click',function(e){
+  if(e.target.closest('button, .substance-btn, #tabnav button')) sndClick();
+});
+
+/* ================= SPLASH -> LOGIN ================= */
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    document.getElementById('splash').classList.add('hide');
+    document.getElementById('login-screen').classList.add('show');
+  },2200);
+});
+
+document.getElementById('btnLogin').addEventListener('click',doLogin);
+document.getElementById('inpClass').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+
+function doLogin(){
+  const name=document.getElementById('inpName').value.trim();
+  const cls=document.getElementById('inpClass').value.trim();
+  const err=document.getElementById('loginErr');
+  if(!name || !cls){ err.textContent='Nama dan kelas wajib diisi.'; sndBad(); return; }
+  err.textContent='';
+  state.student.name=name; state.student.cls=cls;
+  document.getElementById('pillName').textContent=name;
+  document.getElementById('pillClass').textContent=cls;
+  document.getElementById('lkpdName').textContent=name;
+  document.getElementById('lkpdClass').textContent=cls;
+  document.getElementById('lkpdDate').textContent=new Date().toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('login-screen').classList.remove('show');
+  document.getElementById('app').classList.add('show');
+  sndOk();
+  initSimulation();
+}
+
+/* ================= TOAST ================= */
+let toastTimer=null;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* ================= TABS ================= */
+document.querySelectorAll('#tabnav button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#tabnav button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    const id='tab-'+btn.dataset.tab;
+    document.getElementById(id).classList.add('active');
+    state.currentTab=btn.dataset.tab;
+    sndTab();
+  });
+});
+
+document.getElementById('soundToggle').addEventListener('click',()=>{
+  state.soundOn=!state.soundOn;
+  document.getElementById('soundToggle').textContent=state.soundOn?'🔊':'🔇';
+  document.getElementById('soundToggle').classList.toggle('muted',!state.soundOn);
+  if(state.soundOn) sndPop();
+});
+
+document.getElementById('fsToggle').addEventListener('click',()=>{
+  if(!document.fullscreenElement){ document.documentElement.requestFullscreen().catch(()=>{}); }
+  else{ document.exitFullscreen(); }
+});
+
+document.getElementById('resetTabBtn').addEventListener('click',()=>{
+  const tab=state.currentTab;
+  if(tab==='simulasi') resetSim();
+  else if(tab==='lkpd') resetLkpd();
+  else if(tab==='evaluasi') resetEval();
+  else if(tab==='teori') { document.querySelectorAll('#teoriSub button').forEach((b,i)=>b.classList.toggle('active',i===0)); document.querySelectorAll('.teori-block').forEach((b,i)=>b.classList.toggle('active',i===0)); }
+  toast('Tab '+tab+' direset.');
+});
+
+/* ================= TEORI subtabs ================= */
+document.querySelectorAll('#teoriSub button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#teoriSub button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.teori-block').forEach(b=>b.classList.remove('active'));
+    document.getElementById('teori-'+btn.dataset.sub).classList.add('active');
+  });
+});
+
+/* build metallic lattice svg */
+(function buildLattice(){
+  const g=document.getElementById('latticeSvg');
+  let html='';
+  for(let row=0; row<3; row++){
+    for(let col=0; col<7; col++){
+      const x=45+col*84+((row%2)?42:0), y=35+row*55;
+      html+=`<circle cx="${x}" cy="${y}" r="13" fill="#ffc94a" opacity=".9"/>`;
+    }
+  }
+  for(let i=0;i<40;i++){
+    const x=(Math.random()*600+10).toFixed(0), y=(Math.random()*150+10).toFixed(0);
+    html+=`<circle cx="${x}" cy="${y}" r="2.4" fill="#3fd0f5" opacity=".8"><animate attributeName="opacity" values=".2;1;.2" dur="${(1.5+Math.random()*2).toFixed(1)}s" repeatCount="indefinite"/></circle>`;
+  }
+  g.innerHTML=html;
+})();
+
+/* build comparison table */
+(function buildBanding(){
+  const rows=[
+    ['Gaya London','He, CH₄, I₂','Sangat rendah → naik seiring Mr','Fluktuasi awan elektron (dipol sesaat)'],
+    ['Dipol-Dipol','HCl, HBr','Rendah–sedang','Molekul polar permanen'],
+    ['Ikatan Hidrogen','H₂O, NH₃, HF','Tinggi (anomali)','H terikat F/O/N dgn pasangan elektron bebas'],
+    ['Ikatan Logam','Na, Fe, Cu','Sedang–sangat tinggi','Lautan elektron mengikat ion logam positif']
+  ];
+  document.getElementById('bandingBody').innerHTML=rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('');
+})();
+
+/* ================= SIMULASI ================= */
+const substances={
+  ch4:{name:'Metana (CH₄)',type:'vdw',color:'#3fd0f5',boil:-161,melt:-182,info:'Molekul nonpolar. Satu-satunya gaya antarmolekul yang bekerja adalah gaya London (dispersi) yang lemah, sehingga metana mendidih pada suhu sangat rendah (-161 °C) dan berwujud gas pada suhu kamar.'},
+  hcl:{name:'Asam Klorida (HCl)',type:'dip',color:'#8b8bff',boil:-85,melt:-114,info:'Molekul polar. Selain gaya London, HCl memiliki gaya dipol-dipol karena perbedaan keelektronegatifan H dan Cl. Titik didihnya lebih tinggi dari metana, namun HCl tidak membentuk ikatan hidrogen karena Cl kurang elektronegatif/berukuran lebih besar.'},
+  h2o:{name:'Air (H₂O)',type:'hbond',color:'#ff6b6b',boil:100,melt:0,info:'Molekul sangat polar yang membentuk ikatan hidrogen antarmolekulnya. Jaringan ikatan hidrogen yang kuat membuat titik didih air jauh lebih tinggi (100 °C) dibanding perkiraan berdasarkan massa molekulnya saja.'},
+  na:{name:'Natrium Padat (Na)',type:'metal',color:'#ffc94a',boil:883,melt:98,info:'Logam dengan ikatan logam: ion Na⁺ tersusun dalam kisi kristal, dikelilingi lautan elektron valensi yang bergerak bebas. Ikatan logam ini menghasilkan titik leleh (98 °C) yang jauh lebih tinggi daripada senyawa molekul sederhana.'}
+};
+let simState={ sub:'ch4', temp:25, running:true, particles:[], raf:null };
+const legendMap={
+  vdw:[['Gaya London','#3fd0f5']],
+  dip:[['Dipol-dipol','#8b8bff']],
+  hbond:[['Ikatan hidrogen','#ff6b6b']],
+  metal:[['Ion logam','#ffc94a'],['Elektron bebas','#3fd0f5']]
+};
+
+const canvas=document.getElementById('simCanvas');
+const ctx=canvas.getContext('2d');
+function fitCanvas(){
+  const stage=document.getElementById('simStage');
+  canvas.width=stage.clientWidth; canvas.height=stage.clientHeight;
+}
+window.addEventListener('resize',fitCanvas);
+
+function phaseOf(sub,temp){
+  const s=substances[sub];
+  if(sub==='na'){ return temp<s.melt?'PADAT':(temp<s.boil?'CAIR':'GAS'); }
+  return temp<s.melt?'PADAT':(temp<s.boil?'CAIR':'GAS');
+}
+
+function makeParticles(sub){
+  const arr=[]; const n= sub==='na'?42:26;
+  for(let i=0;i<n;i++){
+    arr.push({
+      x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+      vx:(Math.random()-.5), vy:(Math.random()-.5),
+      hx:Math.random()*canvas.width, hy:Math.random()*canvas.height, // home for solid lattice
+      r: sub==='na'? (i%7===0?0:0) : (sub==='h2o'?7:6)
+    });
+  }
+  return arr;
+}
+
+function initSimulation(){
+  fitCanvas();
+  renderSubstanceUI();
+  resetSim();
+  loop();
+}
+
+function renderSubstanceUI(){
+  const s=substances[simState.sub];
+  document.getElementById('substanceInfo').textContent=s.info;
+  const legend=legendMap[s.type];
+  document.getElementById('simLegend').innerHTML=legend.map(l=>`<span><i style="background:${l[1]}"></i>${l[0]}</span>`).join('');
+}
+
+document.querySelectorAll('.substance-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.substance-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    simState.sub=btn.dataset.sub;
+    renderSubstanceUI();
+    resetSim();
+    sndPop();
+  });
+});
+
+document.getElementById('tempSlider').addEventListener('input',e=>{
+  simState.temp=parseInt(e.target.value,10);
+  document.getElementById('tempVal').textContent=simState.temp+' °C';
+  updateHud();
+});
+
+document.getElementById('playPauseBtn').addEventListener('click',()=>{
+  simState.running=!simState.running;
+  document.getElementById('playPauseBtn').textContent=simState.running?'⏸ Jeda':'▶ Lanjut';
+});
+document.getElementById('resetSimBtn').addEventListener('click',()=>{ resetSim(); sndPop(); });
+
+function resetSim(){
+  simState.temp=25; simState.running=true;
+  document.getElementById('tempSlider').value=25;
+  document.getElementById('tempVal').textContent='25 °C';
+  document.getElementById('playPauseBtn').textContent='⏸ Jeda';
+  fitCanvas();
+  simState.particles=makeParticles(simState.sub);
+  updateHud();
+}
+
+function updateHud(){
+  const s=substances[simState.sub];
+  const ph=phaseOf(simState.sub,simState.temp);
+  const tag=document.getElementById('phaseTag');
+  tag.textContent=ph;
+  const colorMap={PADAT:'#8b8bff',CAIR:'#3fd0f5',GAS:'#ff6b6b'};
+  tag.style.background=colorMap[ph]+'26'; tag.style.color=colorMap[ph];
+  document.getElementById('hudTemp').textContent=simState.temp+' °C';
+  const speed=Math.max(.15,Math.min(3.2,(simState.temp+180)/120));
+  document.getElementById('hudSpeed').textContent= speed<.6?'lambat':(speed<1.6?'sedang':'cepat');
+}
+
+let lastPhase='';
+function loop(){
+  simState.raf=requestAnimationFrame(loop);
+  if(!document.getElementById('tab-simulasi').classList.contains('active')) return;
+  if(!ctx || canvas.width===0) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const s=substances[simState.sub];
+  const ph=phaseOf(simState.sub,simState.temp);
+  if(ph!==lastPhase){ lastPhase=ph; if(state.soundOn){ beep(ph==='GAS'?900:(ph==='CAIR'?600:400),.15,'triangle',.05);} updateHud(); }
+  const speed=Math.max(.15,Math.min(3.2,(simState.temp+180)/120));
+  const bondStrength = ph==='PADAT'?1:(ph==='CAIR'?.55:.12);
+
+  if(simState.running){
+    simState.particles.forEach(p=>{
+      if(ph==='PADAT'){
+        p.x += (p.hx-p.x)*0.02 + (Math.random()-.5)*speed*1.2;
+        p.y += (p.hy-p.y)*0.02 + (Math.random()-.5)*speed*1.2;
+      } else {
+        p.x+=p.vx*speed*1.6; p.y+=p.vy*speed*1.6;
+        if(p.x<10||p.x>canvas.width-10) p.vx*=-1;
+        if(p.y<10||p.y>canvas.height-10) p.vy*=-1;
+        p.x=Math.max(10,Math.min(canvas.width-10,p.x));
+        p.y=Math.max(10,Math.min(canvas.height-10,p.y));
+      }
+    });
+  }
+
+  // bonds
+  if(ph!=='GAS'){
+    ctx.lineWidth=1.4;
+    for(let i=0;i<simState.particles.length;i++){
+      for(let j=i+1;j<simState.particles.length;j++){
+        const a=simState.particles[i], b=simState.particles[j];
+        const d=Math.hypot(a.x-b.x,a.y-b.y);
+        const maxD = s.type==='metal'?70:60;
+        if(d<maxD){
+          ctx.globalAlpha=Math.max(0,(1-d/maxD))*bondStrength;
+          ctx.strokeStyle=s.color;
+          ctx.setLineDash(s.type==='hbond'?[5,4]:(s.type==='metal'?[]:[2,4]));
+          ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        }
+      }
+    }
+    ctx.globalAlpha=1; ctx.setLineDash([]);
+  }
+
+  // particles
+  simState.particles.forEach(p=>{
+    ctx.beginPath();
+    const rad = s.type==='metal' ? 5 : (s.type==='hbond'?7:6);
+    const grad=ctx.createRadialGradient(p.x-2,p.y-2,1,p.x,p.y,rad);
+    grad.addColorStop(0,'#ffffff'); grad.addColorStop(.5,s.color); grad.addColorStop(1,s.color);
+    ctx.fillStyle=grad;
+    ctx.arc(p.x,p.y,rad,0,Math.PI*2); ctx.fill();
+  });
+
+  // metallic: drifting free electrons on top
+  if(s.type==='metal'){
+    if(!simState._e) simState._e=Array.from({length:26},()=>({x:Math.random()*canvas.width,y:Math.random()*canvas.height,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2}));
+    simState._e.forEach(e=>{
+      if(simState.running){
+        e.x+=e.vx*speed; e.y+=e.vy*speed;
+        if(e.x<0||e.x>canvas.width) e.vx*=-1;
+        if(e.y<0||e.y>canvas.height) e.vy*=-1;
+      }
+      ctx.beginPath(); ctx.fillStyle='rgba(63,208,245,.85)';
+      ctx.arc(e.x,e.y,2.2,0,Math.PI*2); ctx.fill();
+    });
+  } else { simState._e=null; }
+}
+
+canvas.addEventListener('click',(e)=>{
+  const rect=canvas.getBoundingClientRect();
+  const mx=e.clientX-rect.left, my=e.clientY-rect.top;
+  const hit=simState.particles.find(p=>Math.hypot(p.x-mx,p.y-my)<14);
+  if(hit){ toast(substances[simState.sub].name+' · fase saat ini: '+phaseOf(simState.sub,simState.temp)); sndPop(); }
+});
+
+/* ================= LKPD ================= */
+function collectLkpd(){
+  const data={};
+  document.querySelectorAll('#lkpdSheet input[data-k]').forEach(inp=>data[inp.dataset.k]=inp.value);
+  document.querySelectorAll('#lkpdSheet textarea[data-k]').forEach(t=>data[t.dataset.k]=t.value);
+  return data;
+}
+function applyLkpd(data){
+  document.querySelectorAll('#lkpdSheet input[data-k]').forEach(inp=>{ if(data[inp.dataset.k]!==undefined) inp.value=data[inp.dataset.k]; });
+  document.querySelectorAll('#lkpdSheet textarea[data-k]').forEach(t=>{ if(data[t.dataset.k]!==undefined) t.value=data[t.dataset.k]; });
+}
+document.getElementById('btnSaveLkpd').addEventListener('click',()=>{
+  state.lkpd=collectLkpd();
+  document.getElementById('lkpdSaveFlag').textContent='✓ Jawaban tersimpan pada sesi ini ('+new Date().toLocaleTimeString('id-ID')+')';
+  sndOk();
+});
+document.getElementById('btnResetLkpd').addEventListener('click',resetLkpd);
+function resetLkpd(){
+  document.querySelectorAll('#lkpdSheet input[data-k]').forEach(i=>i.value='');
+  document.querySelectorAll('#lkpdSheet textarea[data-k]').forEach(t=>t.value='');
+  state.lkpd={};
+  document.getElementById('lkpdSaveFlag').textContent='';
+}
+document.getElementById('btnPdfLkpd').addEventListener('click', async ()=>{
+  state.lkpd=collectLkpd();
+  const sheet=document.getElementById('lkpdSheet');
+  toast('Menyiapkan PDF...');
+  try{
+    const canvasImg=await html2canvas(sheet,{scale:2,backgroundColor:'#ffffff'});
+    const imgData=canvasImg.toDataURL('image/png');
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF('p','mm','a4');
+    const pageW=pdf.internal.pageSize.getWidth();
+    const pageH=pdf.internal.pageSize.getHeight();
+    const imgW=pageW-20;
+    const imgH=canvasImg.height*imgW/canvasImg.width;
+    let heightLeft=imgH, position=10;
+    pdf.addImage(imgData,'PNG',10,position,imgW,imgH);
+    heightLeft-=(pageH-20);
+    while(heightLeft>0){
+      position=heightLeft-imgH+10;
+      pdf.addPage();
+      pdf.addImage(imgData,'PNG',10,position,imgW,imgH);
+      heightLeft-=(pageH-20);
+    }
+    pdf.save('LKPD_'+(state.student.name||'siswa').replace(/\s+/g,'_')+'.pdf');
+    sndOk();
+  }catch(err){
+    toast('Gagal membuat PDF (periksa koneksi internet untuk memuat pustaka PDF).');
+    sndBad();
+  }
+});
+
+/* ================= EVALUASI ================= */
+const QUESTIONS=[
+ {type:'single',q:'Gaya antarmolekul yang terjadi pada SEMUA jenis molekul, termasuk molekul nonpolar, adalah...',opts:['Ikatan hidrogen','Gaya London (dispersi)','Ikatan logam','Ikatan ion'],ans:1},
+ {type:'single',q:'Ikatan hidrogen dapat terbentuk apabila atom H terikat langsung pada atom...',opts:['C, H, O','F, O, N','Cl, Br, I','Na, K, Ca'],ans:1},
+ {type:'single',q:'Molekul berikut yang TIDAK dapat membentuk ikatan hidrogen antarmolekulnya adalah...',opts:['H₂O','NH₃','HF','HCl'],ans:3},
+ {type:'single',q:'Model yang menjelaskan ikatan logam adalah...',opts:['Lautan elektron di sekitar ion logam positif','Pasangan elektron bebas antaratom','Serah terima elektron antara logam dan nonlogam','Tumpang tindih orbital hibrida'],ans:0},
+ {type:'single',q:'Air memiliki titik didih yang jauh lebih tinggi daripada H₂S terutama karena...',opts:['Air memiliki gaya London lebih kuat','Air membentuk ikatan hidrogen antarmolekul','Air memiliki ikatan logam','Massa molekul air lebih besar dari H₂S'],ans:1},
+ {type:'single',q:'Sifat logam yang dapat ditempa menjadi lempengan tipis (malleable) disebabkan oleh...',opts:['Ion logam saling tolak-menolak','Lapisan ion dapat bergeser tanpa memutus ikatan karena diselimuti elektron bebas','Logam tidak memiliki ikatan antaratom','Elektron valensi terikat kuat pada satu inti atom'],ans:1},
+ {type:'single',q:'Urutan titik didih dari terendah ke tertinggi berdasarkan simulasi zat CH₄, HCl, dan H₂O adalah...',opts:['H₂O < HCl < CH₄','CH₄ < HCl < H₂O','HCl < CH₄ < H₂O','CH₄ < H₂O < HCl'],ans:1},
+ {type:'multi',q:'Manakah pernyataan berikut yang BENAR mengenai gaya London? (pilih semua yang sesuai)',opts:['Terjadi pada molekul nonpolar','Disebabkan oleh dipol sesaat akibat fluktuasi elektron','Merupakan gaya antarmolekul terkuat','Semakin besar Mr suatu molekul nonpolar, umumnya gaya London semakin kuat'],ans:[0,1,3]},
+ {type:'multi',q:'Manakah zat berikut yang molekulnya dapat membentuk ikatan hidrogen? (pilih semua yang sesuai)',opts:['H₂O','NH₃','HF','CH₄'],ans:[0,1,2]},
+ {type:'multi',q:'Manakah yang termasuk sifat-sifat logam akibat ikatan logam? (pilih semua yang sesuai)',opts:['Konduktor listrik yang baik','Dapat ditempa (malleable)','Umumnya rapuh seperti kristal ion','Mengkilap'],ans:[0,1,3]},
+ {type:'multi',q:'Manakah pasangan zat yang gaya antarmolekul utamanya adalah gaya dipol-dipol (bukan ikatan hidrogen)? (pilih semua yang sesuai)',opts:['HCl','HBr','H₂O','NH₃'],ans:[0,1]},
+ {type:'blank',q:'Lengkapi paragraf berikut: Ikatan hidrogen terbentuk saat atom hidrogen yang terikat pada atom {b1} berinteraksi dengan pasangan elektron bebas pada atom {b1} dari molekul lain.',blanks:{b1:['F, O, atau N','o,f,n','oxigen, fluor, nitrogen']}},
+ {type:'blank',q:'Lengkapi paragraf berikut: Dalam model ikatan logam, elektron valensi bergerak bebas membentuk apa yang disebut {b1}, yang mengelilingi ion logam bermuatan {b2}.',blanks:{b1:['lautan elektron','sea of electrons'],b2:['positif']}},
+ {type:'blank',q:'Lengkapi paragraf berikut: Semakin {b1} massa molekul relatif suatu zat nonpolar, semakin {b2} gaya London yang dihasilkan karena awan elektronnya semakin mudah terpolarisasi.',blanks:{b1:['besar'],b2:['kuat']}},
+ {type:'blank',q:'Lengkapi paragraf berikut: Titik didih HCl lebih tinggi dibanding CH₄ karena HCl memiliki gaya {b1}, sedangkan CH₄ hanya memiliki gaya {b2}.',blanks:{b1:['dipol-dipol'],b2:['london','london (dispersi)','dispersi']}}
+];
+
+function resetEval(){
+  state.eval={idx:0,answers:{},submitted:false};
+  document.getElementById('evalIntro').style.display='block';
+  document.getElementById('evalRunning').style.display='none';
+  document.getElementById('evalResult').style.display='none';
+}
+document.getElementById('btnStartEval').addEventListener('click',()=>{
+  state.eval={idx:0,answers:{},submitted:false};
+  document.getElementById('evalIntro').style.display='none';
+  document.getElementById('evalRunning').style.display='block';
+  renderQuestion();
+  sndOk();
+});
+document.getElementById('btnRetryEval').addEventListener('click',()=>{
+  document.getElementById('evalResult').style.display='none';
+  document.getElementById('evalIntro').style.display='block';
+});
+
+function renderQuestion(){
+  const i=state.eval.idx;
+  const q=QUESTIONS[i];
+  const area=document.getElementById('evalQArea');
+  document.getElementById('evalProgressBar').style.width=((i)/QUESTIONS.length*100)+'%';
+  document.getElementById('evalPos').textContent=(i+1)+' / '+QUESTIONS.length;
+  let html='<div class="q-card"><div class="qn">SOAL '+(i+1)+' · '+
+    (q.type==='single'?'PILIHAN GANDA':(q.type==='multi'?'PILIHAN GANDA KOMPLEKS':'MELENGKAPI PARAGRAF'))+'</div>';
+
+  if(q.type==='blank'){
+    let txt=q.q;
+    Object.keys(q.blanks).forEach(k=>{
+      txt=txt.replace('{'+k+'}',`<input class="blank-input" data-blank="${k}" value="${(state.eval.answers[i]&&state.eval.answers[i][k])||''}" placeholder="...">`);
+    });
+    html+='<div class="qtext">'+txt+'</div></div>';
+  } else {
+    html+='<div class="qtext">'+q.q+'</div>';
+    q.opts.forEach((opt,oi)=>{
+      const inType=q.type==='single'?'radio':'checkbox';
+      const name='q'+i;
+      const checked = q.type==='single' ? (state.eval.answers[i]===oi?'checked':'')
+                     : ((state.eval.answers[i]||[]).includes(oi)?'checked':'');
+      html+=`<label class="opt"><input type="${inType}" name="${name}" value="${oi}" ${checked}> ${opt}</label>`;
+    });
+    html+='</div>';
+  }
+  area.innerHTML=html;
+
+  if(q.type==='single'){
+    area.querySelectorAll('input[type=radio]').forEach(r=>r.addEventListener('change',e=>{ state.eval.answers[i]=parseInt(e.target.value,10); sndPop(); }));
+  } else if(q.type==='multi'){
+    area.querySelectorAll('input[type=checkbox]').forEach(c=>c.addEventListener('change',()=>{
+      const chosen=[...area.querySelectorAll('input[type=checkbox]:checked')].map(x=>parseInt(x.value,10));
+      state.eval.answers[i]=chosen; sndPop();
+    }));
+  } else {
+    area.querySelectorAll('.blank-input').forEach(inp=>inp.addEventListener('input',()=>{
+      state.eval.answers[i]=state.eval.answers[i]||{};
+      state.eval.answers[i][inp.dataset.blank]=inp.value;
+    }));
+  }
+  document.getElementById('evalPrev').disabled=(i===0);
+  document.getElementById('evalNext').textContent = (i===QUESTIONS.length-1)?'Selesai ✓':'Berikutnya →';
+}
+
+document.getElementById('evalPrev').addEventListener('click',()=>{ if(state.eval.idx>0){ state.eval.idx--; renderQuestion(); } });
+document.getElementById('evalNext').addEventListener('click',()=>{
+  if(state.eval.idx<QUESTIONS.length-1){ state.eval.idx++; renderQuestion(); }
+  else { finishEval(); }
+});
+
+function normalize(s){ return (s||'').toString().trim().toLowerCase().replace(/\s+/g,' '); }
+function finishEval(){
+  let correct=0;
+  QUESTIONS.forEach((q,i)=>{
+    const a=state.eval.answers[i];
+    if(q.type==='single'){ if(a===q.ans) correct++; }
+    else if(q.type==='multi'){
+      const arr=(a||[]).slice().sort();
+      const target=q.ans.slice().sort();
+      if(arr.length===target.length && arr.every((v,idx)=>v===target[idx])) correct++;
+    } else if(q.type==='blank'){
+      const ansObj=a||{};
+      let allOk=true;
+      Object.keys(q.blanks).forEach(k=>{
+        const accepted=q.blanks[k].map(normalize);
+        if(!accepted.includes(normalize(ansObj[k]))) allOk=false;
+      });
+      if(allOk) correct++;
+    }
+  });
+  document.getElementById('evalRunning').style.display='none';
+  document.getElementById('evalResult').style.display='block';
+  document.getElementById('evalProgressBar').style.width='100%';
+  const pct=Math.round(correct/QUESTIONS.length*100);
+  document.getElementById('scoreRing').style.setProperty('--pct',pct);
+  document.getElementById('scoreNum').textContent=correct;
+  let label='Terus Berlatih';
+  if(pct>=85) label='Luar Biasa! 🎉';
+  else if(pct>=65) label='Bagus, Pemahamanmu Cukup Baik';
+  else if(pct>=40) label='Cukup, Perlu Ditingkatkan Lagi';
+  document.getElementById('scoreLabel').textContent=label+' — Nilai: '+pct;
+  document.getElementById('scoreDetail').textContent='Kamu menjawab benar '+correct+' dari '+QUESTIONS.length+' soal tentang gaya antarmolekul, ikatan hidrogen, dan ikatan logam.';
+  if(pct>=65) sndOk(); else sndBad();
+}
+
+/* ================= AI ASSISTANT (offline, rule-based) ================= */
+const KB=[
+ {k:['london','dispersi','nonpolar'],a:'Gaya London (dispersi) terjadi pada semua molekul, termasuk yang nonpolar. Penyebabnya adalah fluktuasi awan elektron yang menciptakan dipol sesaat, lalu menginduksi dipol pada molekul di sekitarnya. Semakin besar molekul (Mr besar), gaya ini semakin kuat.'},
+ {k:['dipol','polar'],a:'Gaya dipol-dipol terjadi antarmolekul polar yang memiliki momen dipol permanen, misalnya HCl. Sisi molekul yang agak positif tarik-menarik dengan sisi molekul lain yang agak negatif.'},
+ {k:['hidrogen','h-bond','ikatan h'],a:'Ikatan hidrogen terbentuk saat atom H terikat langsung pada atom F, O, atau N, dan berinteraksi dengan pasangan elektron bebas pada atom F/O/N molekul lain. Contohnya pada H₂O, NH₃, dan HF — inilah sebabnya air memiliki titik didih tinggi.'},
+ {k:['logam','lautan elektron','sea of electron'],a:'Ikatan logam terbentuk dari tarik-menarik antara ion logam positif dengan "lautan elektron" — elektron valensi yang bergerak bebas mengelilingi seluruh kisi kristal logam. Model ini menjelaskan sifat konduktor, mengkilap, dan dapat ditempa pada logam.'},
+ {k:['titik didih','mendidih','boiling'],a:'Titik didih dipengaruhi kekuatan gaya antarmolekul: makin kuat gayanya, makin banyak energi (suhu) yang dibutuhkan untuk memisahkan molekul menjadi fase gas. Urutan umum: gaya London < dipol-dipol < ikatan hidrogen ≲ ikatan logam.'},
+ {k:['air','h2o'],a:'Air (H₂O) memiliki ikatan hidrogen yang kuat karena setiap molekulnya bisa membentuk hingga 4 ikatan hidrogen dengan molekul air lain. Ini membuat titik didih air (100°C) jauh lebih tinggi dibanding H₂S yang strukturnya mirip.'},
+ {k:['metana','ch4'],a:'Metana (CH₄) adalah molekul nonpolar simetris, sehingga hanya memiliki gaya London yang lemah. Akibatnya, metana mendidih pada suhu sangat rendah (-161°C) dan berwujud gas pada suhu kamar.'},
+ {k:['natrium','logam na'],a:'Natrium (Na) padat terikat oleh ikatan logam: ion Na⁺ tersusun rapi dalam kisi, dikelilingi elektron valensi yang bergerak bebas. Titik lelehnya 98°C, jauh lebih tinggi dari senyawa molekul sederhana seperti CH₄.'},
+ {k:['lkpd','worksheet'],a:'Untuk mengisi LKPD, jalankan dulu simulasi untuk tiap zat (CH₄, HCl, H₂O, Na) pada tab Simulasi, amati fase dan kekuatan gaya antarmolekulnya, lalu catat hasilnya pada tabel dan pertanyaan diskusi di tab LKPD.'},
+ {k:['cara pakai','cara menggunakan','bagaimana'],a:'Urutan pemakaian: 1) Baca tab Teori, 2) Ikuti langkah di tab Prosedur, 3) Jalankan simulasi partikel di tab Simulasi, 4) Catat pengamatan di tab LKPD, 5) Uji pemahaman di tab Evaluasi.'}
+];
+function aiReply(msg){
+  const m=msg.toLowerCase();
+  for(const item of KB){ if(item.k.some(k=>m.includes(k))) return item.a; }
+  return 'Aku belum punya jawaban spesifik untuk itu 🙂. Coba tanyakan istilah seperti "gaya london", "ikatan hidrogen", "ikatan logam", "titik didih", atau "cara pakai lab ini".';
+}
+const aiBtn=document.getElementById('aiBtn'), aiPanel=document.getElementById('aiPanel'), aiMsgs=document.getElementById('aiMsgs');
+let aiOpened=false;
+aiBtn.addEventListener('click',()=>{
+  aiPanel.classList.toggle('show');
+  if(!aiOpened && aiPanel.classList.contains('show')){
+    aiOpened=true;
+    addAiMsg('Halo'+(state.student.name?', '+state.student.name:'')+'! Aku asisten belajar kimia untuk topik gaya antarmolekul, ikatan hidrogen, dan ikatan logam. Ada yang mau ditanyakan?','bot');
+  }
+});
+document.getElementById('aiForm').addEventListener('submit',(e)=>{
+  e.preventDefault();
+  const inp=document.getElementById('aiInput');
+  const val=inp.value.trim();
+  if(!val) return;
+  addAiMsg(val,'me');
+  inp.value='';
+  setTimeout(()=>{ addAiMsg(aiReply(val),'bot'); sndPop(); },380);
+});
+function addAiMsg(text,who){
+  const d=document.createElement('div');
+  d.className='ai-msg '+who;
+  d.textContent=text;
+  aiMsgs.appendChild(d);
+  aiMsgs.scrollTop=aiMsgs.scrollHeight;
+}
+
+/* init comparison/legend for simulasi before login too (safe no-op) */
+})();
+</script>
+</body>
+</html>
